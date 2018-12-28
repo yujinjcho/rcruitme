@@ -13,12 +13,12 @@
   }
   @form(action = routes.SubmitJobController.submit()) {
     @CSRF.formField
-    @inputText(jobForm("role"))
-    @inputText(jobForm("company"))
-    @inputText(jobForm("compensation"))
-    @inputText(jobForm("location"))
-    @textarea(jobForm("description"))
-    @textarea(jobForm("benefits"))
+    @inputText(jobForm("role"), '_label -> "Role", '_showConstraints -> false)
+    @inputText(jobForm("company"), '_label -> "Company", '_showConstraints -> false)
+    @inputText(jobForm("compensation"), '_label -> "Annual Compensation", '_showConstraints -> false)
+    @inputText(jobForm("location"), '_label -> "Location", '_showConstraints -> false)
+    @textarea(jobForm("description"), '_label -> "Description", '_showConstraints -> false)
+    @textarea(jobForm("benefits"), '_label -> "Benefits / Other", '_showConstraints -> false)
     <div>
       <button type="submit" value="submit">Submit</button>
     </div>

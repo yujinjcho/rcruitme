@@ -1,6 +1,7 @@
 package models.services
 
 import anorm._
+import anorm.JodaParameterMetaData._
 import javax.inject._
 import play.api.db.DBApi
 import scala.concurrent.ExecutionContext.Implicits.global

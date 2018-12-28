@@ -1,7 +1,5 @@
 package models
 
-import anorm._
-import anorm.JodaParameterMetaData._
 import org.joda.time.DateTime
 
 case class Job(
@@ -16,8 +14,3 @@ case class Job(
   viewed: Boolean = false,
   submittedAt: DateTime = DateTime.now
 )
-
-object Job {
-  implicit def toParameters: ToParameterList[Job] =
-    Macro.toParameters[Job]
-}

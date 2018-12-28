@@ -1,0 +1,27 @@
+@import forms.JobForm.Data
+@import helper._
+@import play.api.data.Form
+@import play.api.i18n.Messages
+
+@(jobForm: Form[Data])(implicit request: RequestHeader, messages: Messages, flash: Flash)
+
+@main("Submit Job") {
+  @flash.get("info").map { msg =>
+    <div>
+      <strong>@msg</strong>
+    </div>
+  }
+  @form(action = routes.SubmitJobController.submit()) {
+    @CSRF.formField
+    @inputText(jobForm("role"), '_label -> "Role", '_showConstraints -> false)
+    @inputText(jobForm("company"), '_label -> "Company", '_showConstraints -> false)
+    @inputText(jobForm("location"), '_label -> "Location", '_showConstraints -> false)
+    @inputText(jobForm("salary"), '_label -> "Annual Salary", '_showConstraints -> false)
+    @inputText(jobForm("compensation"), '_label -> "Additional Compensation Details", '_showConstraints -> false)
+    @textarea(jobForm("description"), '_label -> "Description", '_showConstraints -> false)
+    @textarea(jobForm("benefits"), '_label -> "Benefits / Other", '_showConstraints -> false)
+    <div>
+      <button type="submit" value="submit">Submit</button>
+    </div>
+  }
+}

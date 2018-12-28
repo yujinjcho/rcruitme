@@ -27,8 +27,9 @@ class SubmitJobController @Inject()(
         val job = Job(
           role = data.role,
           company = data.company,
-          compensation = data.compensation,
           location = data.location,
+          salary = data.salary,
+          compensation = data.compensation,
           description = data.description,
           benefits = data.benefits
         )

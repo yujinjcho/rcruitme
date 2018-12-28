@@ -4,8 +4,7 @@ import javax.inject._
 import play.api._
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 import forms.JobForm
 import models.Job
@@ -14,7 +13,7 @@ import models.services.JobService
 class SubmitJobController @Inject()(
   cc: ControllerComponents,
   jobService: JobService
-) extends AbstractController(cc) with I18nSupport {
+)(implicit ec: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
   def view = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.submitJob(JobForm.form))

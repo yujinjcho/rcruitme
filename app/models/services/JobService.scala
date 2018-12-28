@@ -4,13 +4,13 @@ import anorm._
 import anorm.JodaParameterMetaData._
 import javax.inject._
 import play.api.db.DBApi
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+import models.DatabaseExecutionContext
 import models.Job
 
 @Singleton
-class JobService @Inject()(dbapi: DBApi) {
+class JobService @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
 
@@ -45,6 +45,6 @@ class JobService @Inject()(dbapi: DBApi) {
           )
       """).bind(job)(parameters).executeInsert()
     }
-  }
+  }(ec)
 
 }

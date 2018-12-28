@@ -16,7 +16,7 @@ class SubmitJobController @Inject()(
   jobService: JobService
 ) extends AbstractController(cc) with I18nSupport {
 
-  def view() = Action { implicit request: Request[AnyContent] =>
+  def view = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.submitJob(JobForm.form))
   }
 

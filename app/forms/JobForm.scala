@@ -8,8 +8,9 @@ object JobForm {
     mapping(
       "role" -> nonEmptyText,
       "company" -> nonEmptyText,
-      "compensation" -> number,
       "location" -> nonEmptyText,
+      "salary" -> number,
+      "compensation" -> optional(text),
       "description" -> nonEmptyText,
       "benefits" -> optional(text)
     )(Data.apply)(Data.unapply)
@@ -18,8 +19,9 @@ object JobForm {
   case class Data(
     role: String,
     company: String,
-    compensation: Int,
     location: String,
+    salary: Int,
+    compensation: Option[String],
     description: String,
     benefits: Option[String]
   )

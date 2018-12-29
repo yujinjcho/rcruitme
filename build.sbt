@@ -14,5 +14,6 @@ libraryDependencies ++= Seq(
   jdbc,
   evolutions,
   "org.postgresql" % "postgresql" % "42.2.5",
+  "com.mohiva" %% "play-silhouette" % "5.0.5",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 )

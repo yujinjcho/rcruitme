@@ -1,4 +1,9 @@
 GET     /                                   controllers.HomeController.index
+
 GET     /hello                              controllers.HomeController.hello(name:String)
+
 GET     /submit-job                         controllers.SubmitJobController.view
 POST    /submit-job                         controllers.SubmitJobController.submit
+
+GET     /signIn                             controllers.SignInController.view
+# POST    /signIn                             controllers.SignInController.submit

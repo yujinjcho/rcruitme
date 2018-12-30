@@ -9,12 +9,13 @@ import com.mohiva.play.silhouette.api.util.{ Clock, Credentials }
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignInForm
-// import models.services.UserService
-// import net.ceedubs.ficus.Ficus._
 import play.api.Configuration
 import play.api.i18n.{ I18nSupport, Messages }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 import utils.auth.DefaultEnv
+
+
+import forms.SignInForm
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -35,8 +36,12 @@ class SignInController @Inject() (
     Future.successful(Ok(views.html.signIn(SignInForm.form)))
   }
 
-  def submit = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    Future.successful(Ok("TEST"))
+  def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+    SignInForm.form.bindFromRequest.fold(
+      form => Future.successful(BadRequest(views.html.signIn(form))),
+      data => {
+        Future.successful(Redirect(routes.HomeController.index()))
+      }
+    )
   }
-
 }

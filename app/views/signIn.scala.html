@@ -1,15 +1,15 @@
-@import forms.JobForm.Data
+@import forms.SignInForm.Data
 @import helper._
 @import play.api.data.Form
 @import play.api.i18n.Messages
 
-@(jobForm: Form[Data])(implicit request: RequestHeader, messages: Messages, flash: Flash)
+@(signInForm: Form[Data])(implicit request: RequestHeader, messages: Messages, flash: Flash)
 
 @main("Sign In") {
   @form(action = routes.SignInController.submit()) {
     @CSRF.formField
-    @inputText(jobForm("email"), '_label -> "Email", '_showConstraints -> false)
-    @inputPassword(jobForm("password"), '_label -> "Password", '_showConstraints -> false)
+    @inputText(signInForm("email"), '_label -> "Email", '_showConstraints -> false)
+    @inputPassword(signInForm("password"), '_label -> "Password", '_showConstraints -> false)
     <div>
       <button type="submit" value="submit">Submit</button>
     </div>

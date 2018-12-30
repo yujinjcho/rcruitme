@@ -5,5 +5,5 @@ GET     /hello                              controllers.HomeController.hello(nam
 GET     /submit-job                         controllers.SubmitJobController.view
 POST    /submit-job                         controllers.SubmitJobController.submit
 
-GET     /signIn                             controllers.SignInController.view
-# POST    /signIn                             controllers.SignInController.submit
+GET     /sign-in                            controllers.SignInController.view
+POST    /sign-in                            controllers.SignInController.submit

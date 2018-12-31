@@ -8,11 +8,11 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 import forms.JobForm
 import models.Job
-import models.services.JobService
+import models.daos.JobDAO
 
 class SubmitJobController @Inject()(
   cc: ControllerComponents,
-  jobService: JobService
+  jobDAO: JobDAO
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
   def view = Action { implicit request: Request[AnyContent] =>
@@ -32,7 +32,7 @@ class SubmitJobController @Inject()(
           description = data.description,
           benefits = data.benefits
         )
-        jobService.insert(job).map { _ =>
+        jobDAO.create(job).map { _ =>
           Redirect(routes.SubmitJobController.view()).flashing("info" -> "Job submitted.")
         }
       }

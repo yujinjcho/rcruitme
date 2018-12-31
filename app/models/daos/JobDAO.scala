@@ -1,4 +1,4 @@
-package models.services
+package models.daos
 
 import anorm._
 import anorm.JodaParameterMetaData._
@@ -10,13 +10,13 @@ import models.DatabaseExecutionContext
 import models.Job
 
 @Singleton
-class JobService @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
+class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
 
   private val parameters = Macro.toParameters[Job]
 
-  def insert(job: Job): Future[Option[Long]] = Future {
+  def create(job: Job): Future[Option[Long]] = Future {
     db.withConnection { implicit conn =>
       SQL("""
         insert into jobs

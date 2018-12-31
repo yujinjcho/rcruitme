@@ -37,7 +37,7 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
 
 import models.daos._
-import models.services.{ UserService, UserServiceImpl }
+import models.services.UserService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -60,8 +60,8 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
 
-    bind[UserService].to[UserServiceImpl]
-    bind[UserDAO].to[UserDAOImpl]
+    // bind[UserService].to[UserServiceImpl]
+    // bind[UserDAO].to[UserDAOImpl]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[EventBus].toInstance(EventBus())
     bind[Clock].toInstance(Clock())

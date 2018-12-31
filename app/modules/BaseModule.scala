@@ -8,7 +8,7 @@ import net.codingwell.scalaguice.ScalaModule
 class BaseModule extends AbstractModule with ScalaModule {
 
   def configure(): Unit = {
-    bind[UserDAO].to[UserDAOImpl]
-    bind[UserService].to[UserServiceImpl]
+    // bind[UserDAO].to[UserDAOImpl]
+    // bind[UserService].to[UserServiceImpl]
   }
 }

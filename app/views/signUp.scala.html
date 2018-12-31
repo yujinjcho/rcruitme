@@ -1,0 +1,19 @@
+@import forms.SignUpForm.Data
+@import helper._
+@import play.api.data.Form
+@import play.api.i18n.Messages
+
+@(signUpForm: Form[Data])(implicit request: RequestHeader, messages: Messages, flash: Flash)
+
+@main("Sign Up") {
+  @form(action = routes.SignInController.submit()) {
+    @CSRF.formField
+    @inputText(signUpForm("email"), '_label -> "Email", '_showConstraints -> false)
+    @inputText(signUpForm("firstName"), '_label -> "First Name", '_showConstraints -> false)
+    @inputText(signUpForm("lastName"), '_label -> "Last Name", '_showConstraints -> false)
+    @inputPassword(signUpForm("password"), '_label -> "Password", '_showConstraints -> false)
+    <div>
+      <button type="submit" value="submit">Submit</button>
+    </div>
+  }
+}

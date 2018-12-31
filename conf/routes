@@ -7,3 +7,5 @@ POST    /submit-job                         controllers.SubmitJobController.subm
 
 GET     /sign-in                            controllers.SignInController.view
 POST    /sign-in                            controllers.SignInController.submit
+
+GET     /sign-up                            controllers.SignUpController.view

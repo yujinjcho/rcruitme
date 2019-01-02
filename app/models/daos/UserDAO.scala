@@ -18,18 +18,21 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
   private val parameters = Macro.toParameters[User]
 
   def find(loginInfo: LoginInfo) = Future {
-    val user = db.withConnection { implicit c =>
-
+    println("--UserDAO.find--")
+    val user: Option[User] = db.withConnection { implicit c =>
+      println("inside withConnection")
       val email = loginInfo.providerKey
-      val query: SimpleSql[Row] = SQL(
-        """
+      println(email)
+      val result = SQL(
+        s"""
           |select id, first, last, email, type AS userType
-          |FROM user
-          |WHERE email = {email}
-        """.stripMargin)
-        .on("email" -> email)
-      query.as(userRowParser.single)
+          |FROM users
+          |WHERE email = '${email}'
+        """.stripMargin).as(userRowParser.single)
+      println(result)
+      result
     }
+    println("--UserDAO.find end--")
     user
   }(ec)
 
@@ -81,9 +84,14 @@ object UserDAO {
     get[String]("last") ~
     get[String]("email") ~
     get[String]("userType") map {
-      case id~first~last~email~userType =>
-        Some(User(id,Some(first),"credential_id",Some(last),userType,Some(email)))
-      case _ => None
+      case id~first~last~email~userType => {
+        println("hi")
+        Some(User(id, Some(first), "credential_id", Some(last), userType, Some(email)))
+      }
+      case _ => {
+        println("ho")
+        None
+      }
     }
   }
 }

@@ -65,6 +65,13 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[EventBus].toInstance(EventBus())
     bind[Clock].toInstance(Clock())
+
+    // Replace this with the bindings to your concrete DAOs
+    bind[DelegableAuthInfoDAO[PasswordInfo]].toInstance(new InMemoryAuthInfoDAO[PasswordInfo])
+    bind[DelegableAuthInfoDAO[OAuth1Info]].toInstance(new InMemoryAuthInfoDAO[OAuth1Info])
+    bind[DelegableAuthInfoDAO[OAuth2Info]].toInstance(new InMemoryAuthInfoDAO[OAuth2Info])
+    bind[DelegableAuthInfoDAO[OpenIDInfo]].toInstance(new InMemoryAuthInfoDAO[OpenIDInfo])
+
   }
 
   @Provides
@@ -100,6 +107,21 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     val config = configuration.underlying.as[JcaSignerSettings]("silhouette.authenticator.signer")
 
     new JcaSigner(config)
+  }
+
+  @Provides
+  def provideAuthInfoRepository(
+                                 passwordInfoDAO: DelegableAuthInfoDAO[PasswordInfo],
+                                 oauth1InfoDAO: DelegableAuthInfoDAO[OAuth1Info],
+                                 oauth2InfoDAO: DelegableAuthInfoDAO[OAuth2Info],
+                                 openIDInfoDAO: DelegableAuthInfoDAO[OpenIDInfo]): AuthInfoRepository = {
+
+    new DelegableAuthInfoRepository(passwordInfoDAO, oauth1InfoDAO, oauth2InfoDAO, openIDInfoDAO)
+  }
+
+  @Provides
+  def providePasswordHasherRegistry(): PasswordHasherRegistry = {
+    PasswordHasherRegistry(new BCryptSha256PasswordHasher(), Seq(new BCryptPasswordHasher()))
   }
 
   @Provides

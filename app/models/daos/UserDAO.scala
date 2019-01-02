@@ -18,21 +18,16 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
   private val parameters = Macro.toParameters[User]
 
   def find(loginInfo: LoginInfo) = Future {
-    println("--UserDAO.find--")
     val user: Option[User] = db.withConnection { implicit c =>
-      println("inside withConnection")
       val email = loginInfo.providerKey
-      println(email)
       val result = SQL(
         s"""
           |select id, first, last, email, type AS userType
           |FROM users
           |WHERE email = '${email}'
-        """.stripMargin).as(userRowParser.single)
-      println(result)
+        """.stripMargin).as(userRowParser.singleOpt)
       result
     }
-    println("--UserDAO.find end--")
     user
   }(ec)
 
@@ -54,22 +49,25 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
 
   def save(user: User): Future[User] = Future {
     val userId = db.withConnection { implicit conn =>
-      SQL("""
-        insert into users
-          (
-            first,
-            last,
-            email,
-            type
-          )
-        values
-          (
-            ${user.firstName},
-            ${user.lastName},
-            ${user.email},
-            ${user.userType}
-          )
-      """).executeInsert()
+      user match {
+        case User(_, Some(first), credentialId, Some(last), userType, Some(email)) =>
+          SQL(s"""
+            insert into users
+              (
+                first,
+                last,
+                email,
+                type
+              )
+            values
+              (
+                '${first}',
+                '${last}',
+                '${email}',
+                '${userType}'
+              )
+          """).executeInsert()
+      }
     }
     user.copy(userID = userId.get.toInt)
   }(ec)
@@ -78,20 +76,15 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
 
 object UserDAO {
 
-  val userRowParser: anorm.RowParser[Option[User]] = {
+  val userRowParser: anorm.RowParser[User] = {
     get[Int]("id") ~
     get[String]("first") ~
     get[String]("last") ~
     get[String]("email") ~
     get[String]("userType") map {
       case id~first~last~email~userType => {
-        println("hi")
-        Some(User(id, Some(first), "credential_id", Some(last), userType, Some(email)))
-      }
-      case _ => {
-        println("ho")
-        None
-      }
+        User(id, Some(first), "credential_id", Some(last), userType, Some(email))}
+      // case _ => should throw some exception here?
     }
   }
 }

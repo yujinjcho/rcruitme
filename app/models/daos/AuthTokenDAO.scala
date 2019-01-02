@@ -53,7 +53,7 @@ class AuthTokenDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
 
   def save(token: AuthToken): Future[AuthToken] = Future {
     val authTokenId = db.withConnection { implicit conn =>
-      SQL("""
+      val query = s"""
         insert into auth_tokens
           (
             user_id,
@@ -61,10 +61,11 @@ class AuthTokenDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
           )
         values
           (
-            ${token.userID},
-            ${token.expiry}
+            '${token.userID}',
+            '${token.expiry}'
           )
-      """).executeInsert(SqlParser.scalar[UUID].singleOpt)
+        """
+      SQL(query).executeInsert(SqlParser.scalar[UUID].singleOpt)
     }
     token.copy(id = authTokenId.get)
   }(ec)

@@ -47,19 +47,15 @@ class SignUpController @Inject() (
   }
 
   def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    println("---start of submit---")
     SignUpForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(views.html.signUp(form))),
       data => {
-        val result = Redirect(routes.SignUpController.view()).flashing("info" -> Messages("sign.up.email.sent", data.email))
+        val redirect = Redirect(routes.SignUpController.view()).flashing("info" -> Messages("sign.up.email.sent", data.email))
         val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
-        println("---before userService.retrieve---")
         userService.retrieve(loginInfo).flatMap {
           case Some(user) =>
-            println("---found user---")
             val url = routes.SignInController.view().absoluteURL()
 
-            println("mailerClient.send email.already.signed.up.subject")
             // mailerClient.send(Email(
             //   subject = Messages("email.already.signed.up.subject"),
             //   from = Messages("email.from"),
@@ -67,9 +63,8 @@ class SignUpController @Inject() (
             //   bodyText = Some(views.txt.emails.alreadySignedUp(user, url).body),
             //   bodyHtml = Some(views.html.emails.alreadySignedUp(user, url).body)
             // ))
-            Future.successful(result)
+            Future.successful(redirect)
           case _ =>
-            println("---did not find user---")
             val authInfo = passwordHasherRegistry.current.hash(data.password)
 
             val user = User(
@@ -86,7 +81,6 @@ class SignUpController @Inject() (
               authToken <- authTokenService.create(user.userID)
             } yield {
               // val url = routes.ActivateAccountController.activate(authToken.id).absoluteURL()
-              println("mailerClient.send email.sign.up.subject")
               // mailerClient.send(Email(
               //   subject = Messages("email.sign.up.subject"),
               //   from = Messages("email.from"),
@@ -96,12 +90,9 @@ class SignUpController @Inject() (
               // ))
 
               silhouette.env.eventBus.publish(SignUpEvent(user, request))
-              result
+              redirect
             }
         }
-
-
-        Future.successful(result)
       }
     )
   }

@@ -60,8 +60,6 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
 
-    // bind[UserService].to[UserServiceImpl]
-    // bind[UserDAO].to[UserDAOImpl]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[EventBus].toInstance(EventBus())
     bind[Clock].toInstance(Clock())
@@ -91,30 +89,28 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
   @Provides @Named("oauth1-token-secret-crypter")
   def provideOAuth1TokenSecretCrypter(configuration: Configuration): Crypter = {
     val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.oauth1TokenSecretProvider.crypter")
-
     new JcaCrypter(config)
   }
 
   @Provides @Named("authenticator-crypter")
   def provideAuthenticatorCrypter(configuration: Configuration): Crypter = {
     val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.authenticator.crypter")
-
     new JcaCrypter(config)
   }
 
   @Provides @Named("authenticator-signer")
   def provideAuthenticatorSigner(configuration: Configuration): Signer = {
     val config = configuration.underlying.as[JcaSignerSettings]("silhouette.authenticator.signer")
-
     new JcaSigner(config)
   }
 
   @Provides
   def provideAuthInfoRepository(
-                                 passwordInfoDAO: DelegableAuthInfoDAO[PasswordInfo],
-                                 oauth1InfoDAO: DelegableAuthInfoDAO[OAuth1Info],
-                                 oauth2InfoDAO: DelegableAuthInfoDAO[OAuth2Info],
-                                 openIDInfoDAO: DelegableAuthInfoDAO[OpenIDInfo]): AuthInfoRepository = {
+    passwordInfoDAO: DelegableAuthInfoDAO[PasswordInfo],
+    oauth1InfoDAO: DelegableAuthInfoDAO[OAuth1Info],
+    oauth2InfoDAO: DelegableAuthInfoDAO[OAuth2Info],
+    openIDInfoDAO: DelegableAuthInfoDAO[OpenIDInfo]
+  ): AuthInfoRepository = {
 
     new DelegableAuthInfoRepository(passwordInfoDAO, oauth1InfoDAO, oauth2InfoDAO, openIDInfoDAO)
   }
@@ -139,5 +135,4 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
 
     new CookieAuthenticatorService(config, None, signer, cookieHeaderEncoding, authenticatorEncoder, fingerprintGenerator, idGenerator, clock)
   }
-
 }

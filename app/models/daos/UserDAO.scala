@@ -1,31 +1,29 @@
 package models.daos
 
-import anorm.{ ~, Macro, SQL, SimpleSql, Row}
-import anorm.SqlParser.get
-import javax.inject.Inject
-import play.api.db.DBApi
-import com.mohiva.play.silhouette.api.LoginInfo
-
-import models.User
-import models.daos.UserDAO._
-import models.DatabaseExecutionContext
-
 import scala.concurrent.Future
 
-class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
+import anorm._
+import anorm.SqlParser.get
+import com.mohiva.play.silhouette.api.LoginInfo
+import javax.inject.Inject
+import play.api.db.DBApi
 
+import models.{ DatabaseExecutionContext, User }
+import models.daos.UserDAO._
+
+
+class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
-  private val parameters = Macro.toParameters[User]
 
   def find(loginInfo: LoginInfo) = Future {
     val user: Option[User] = db.withConnection { implicit c =>
       val email = loginInfo.providerKey
       val result = SQL(
         s"""
-          |select id, first, last, email, type AS userType
-          |FROM users
-          |WHERE email = '${email}'
-        """.stripMargin).as(userRowParser.singleOpt)
+          | SELECT id, first, last, email, type AS userType
+          | FROM users
+          | WHERE email = {email}
+        """.stripMargin).on("email" -> email).as(userRowParser.singleOpt)
       result
     }
     user
@@ -34,15 +32,14 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
 
   def find(userID: Int) = Future {
     db.withConnection { implicit c =>
-
-      val query: SimpleSql[Row] = SQL(
+      SQL(
         """
-          |select id, first, last, email, type AS userType
-          |FROM user
-          |WHERE id = {userId}
+          | SELECT id, first, last, email, type AS userType
+          | FROM user
+          | WHERE id = {userId}
         """.stripMargin)
         .on("userId" -> userID)
-      query.as(userRowParser.single)
+        .as(userRowParser.single)
     }
   }(ec)
 
@@ -52,14 +49,14 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
       user match {
         case User(_, Some(first), credentialId, Some(last), userType, Some(email)) =>
           val query = s"""
-            insert into users
+            INSERT INTO USERS
               (
                 first,
                 last,
                 email,
                 type
               )
-            values
+            VALUES
               (
                 {first},
                 {last},

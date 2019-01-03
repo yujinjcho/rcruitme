@@ -28,7 +28,6 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
     user
   }(ec)
 
-
   def find(userID: Int) = Future {
     db.withConnection { implicit c =>
       SQL(

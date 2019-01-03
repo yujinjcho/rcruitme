@@ -1,13 +1,9 @@
-# auth token table
+# uuids extension
 
 # --- !Ups
 
-create table auth_tokens (
-    id uuid default uuid_generate_v4(),
-    user_id int,
-    expiry timestamp
-);
+create extension "uuid-ossp";
 
 # --- !Downs
 
-drop table auth_tokens;
+drop extension "uuid-ossp";

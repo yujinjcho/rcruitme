@@ -11,7 +11,6 @@ import play.api.db.DBApi
 import models.{ DatabaseExecutionContext, User }
 import models.daos.UserDAO._
 
-
 class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
 
@@ -43,7 +42,6 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
     }
   }(ec)
 
-
   def save(user: User): Future[User] = Future {
     val userId = db.withConnection { implicit conn =>
       user match {
@@ -71,7 +69,6 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
     }
     user.copy(userID = userId.get.toInt)
   }(ec)
-
 }
 
 object UserDAO {

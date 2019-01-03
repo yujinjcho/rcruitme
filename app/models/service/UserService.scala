@@ -20,13 +20,13 @@ class UserService @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext) ex
 
   def save(profile: CommonSocialProfile) = {
     userDAO.find(profile.loginInfo).flatMap {
-      case Some(user) => // Update user with profile
+      case Some(user) =>
         userDAO.save(user.copy(
           firstName = profile.firstName,
           lastName = profile.lastName,
           email = profile.email
         ))
-      case None => // Insert a new user
+      case None =>
         userDAO.save(User(
           userID = 0,
           credentialId = profile.loginInfo.providerID,
@@ -34,7 +34,6 @@ class UserService @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext) ex
           lastName = profile.lastName,
           userType = "user_type",
           email = profile.email
-          // activated = true
         ))
     }
   }

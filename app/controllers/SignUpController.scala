@@ -40,7 +40,6 @@ class SignUpController @Inject() (
             Future.successful(redirect.flashing("info" -> "Account exists already"))
           case _ =>
             val authInfo = passwordHasherRegistry.current.hash(data.password)
-
             val user = User(
               userID = 0,
               firstName = Some(data.firstName),
@@ -54,9 +53,7 @@ class SignUpController @Inject() (
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
               authToken <- authTokenService.create(user.userID)
             } yield {
-
               // TODO: send activation email
-
               silhouette.env.eventBus.publish(SignUpEvent(user, request))
               redirect.flashing("info" -> "Email confirmation has been sent")
             }

@@ -11,8 +11,10 @@ import play.api.mvc._
 import utils.auth.DefaultEnv
 
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents, silhouette: Silhouette[DefaultEnv]) extends AbstractController(cc) {
-
+class HomeController @Inject()(
+  cc: ControllerComponents,
+  silhouette: Silhouette[DefaultEnv]
+) extends AbstractController(cc) {
 
   def index = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
     Future.successful(Ok(views.html.index()))
@@ -21,7 +23,6 @@ class HomeController @Inject()(cc: ControllerComponents, silhouette: Silhouette[
   def hello(name: String) = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.hello(name))
   }
-
 
   def signOut = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
     val result = Redirect(routes.SignInController.view())

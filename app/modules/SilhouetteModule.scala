@@ -68,7 +68,6 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     bind[DelegableAuthInfoDAO[OAuth1Info]].toInstance(new InMemoryAuthInfoDAO[OAuth1Info])
     bind[DelegableAuthInfoDAO[OAuth2Info]].toInstance(new InMemoryAuthInfoDAO[OAuth2Info])
     bind[DelegableAuthInfoDAO[OpenIDInfo]].toInstance(new InMemoryAuthInfoDAO[OpenIDInfo])
-
   }
 
   @Provides
@@ -91,18 +90,21 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
   @Provides @Named("oauth1-token-secret-crypter")
   def provideOAuth1TokenSecretCrypter(configuration: Configuration): Crypter = {
     val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.oauth1TokenSecretProvider.crypter")
+
     new JcaCrypter(config)
   }
 
   @Provides @Named("authenticator-crypter")
   def provideAuthenticatorCrypter(configuration: Configuration): Crypter = {
     val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.authenticator.crypter")
+
     new JcaCrypter(config)
   }
 
   @Provides @Named("authenticator-signer")
   def provideAuthenticatorSigner(configuration: Configuration): Signer = {
     val config = configuration.underlying.as[JcaSignerSettings]("silhouette.authenticator.signer")
+
     new JcaSigner(config)
   }
 
@@ -137,9 +139,7 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     googleProvider: GoogleProvider
   ): SocialProviderRegistry = {
 
-    SocialProviderRegistry(Seq(
-      googleProvider
-    ))
+    SocialProviderRegistry(Seq(googleProvider))
   }
 
   @Provides
@@ -149,6 +149,7 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     configuration: Configuration
   ): CsrfStateItemHandler = {
     val settings = configuration.underlying.as[CsrfStateSettings]("silhouette.csrfStateItemHandler")
+
     new CsrfStateItemHandler(settings, idGenerator, signer)
   }
 
@@ -170,12 +171,14 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
   @Provides @Named("social-state-signer")
   def provideSocialStateSigner(configuration: Configuration): Signer = {
     val config = configuration.underlying.as[JcaSignerSettings]("silhouette.socialStateHandler.signer")
+
     new JcaSigner(config)
   }
 
   @Provides @Named("oauth1-token-secret-signer")
   def provideOAuth1TokenSecretSigner(configuration: Configuration): Signer = {
     val config = configuration.underlying.as[JcaSignerSettings]("silhouette.oauth1TokenSecretProvider.signer")
+
     new JcaSigner(config)
   }
 

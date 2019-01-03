@@ -1,14 +1,13 @@
 package models.daos
 
 import scala.concurrent.Future
-
 import java.util.UUID
 
 import anorm._
 import anorm.SqlParser.get
-import play.api.db.DBApi
 import javax.inject.Inject
 import org.joda.time.DateTime
+import play.api.db.DBApi
 
 import models.daos.AuthTokenDAO._
 import models.{ AuthToken, DatabaseExecutionContext }

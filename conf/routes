@@ -2,6 +2,8 @@ GET     /                                   controllers.HomeController.index
 
 GET     /hello                              controllers.HomeController.hello(name:String)
 
+GET     /sign-out                           controllers.HomeController.signOut
+
 GET     /submit-job                         controllers.SubmitJobController.view
 POST    /submit-job                         controllers.SubmitJobController.submit
 

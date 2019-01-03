@@ -1,4 +1,5 @@
 
+invalid.credentials = Invalid credentials!
 sign.up.email.sent = You''re almost done! We sent an activation mail to {0}. Please follow the instructions in the email to activate your account. If it doesn''t arrive, check your spam folder, or try to log in again to send another activation mail.
 activation.email.sent = We sent another activation email to you at {0}. It might take a few minutes for it to arrive; be sure to check your spam folder.
 reset.email.sent = We have sent you an email with further instructions to reset your password, on condition that the address was found in our system. If you do not receive an email within the next 5 minutes, then please recheck your entered email address and try it again.

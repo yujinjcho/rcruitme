@@ -6,6 +6,11 @@
 @(signUpForm: Form[Data])(implicit request: RequestHeader, messages: Messages, flash: Flash)
 
 @main("Sign Up") {
+  @flash.get("info").map { msg =>
+    <div>
+      <strong>@msg</strong>
+    </div>
+  }
   @form(action = routes.SignUpController.submit()) {
     @CSRF.formField
     @inputText(signUpForm("email"), '_label -> "Email", '_showConstraints -> false)

@@ -51,7 +51,7 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
     val userId = db.withConnection { implicit conn =>
       user match {
         case User(_, Some(first), credentialId, Some(last), userType, Some(email)) =>
-          SQL(s"""
+          val query = s"""
             insert into users
               (
                 first,
@@ -61,12 +61,15 @@ class UserDAO @Inject()(dbapi: DBApi, ec: DatabaseExecutionContext) {
               )
             values
               (
-                '${first}',
-                '${last}',
-                '${email}',
-                '${userType}'
+                {first},
+                {last},
+                {email},
+                {userType}
               )
-          """).executeInsert()
+          """
+          SQL(query)
+            .on("first" -> first, "last" -> last, "email" -> email, "userType" -> userType)
+            .executeInsert()
       }
     }
     user.copy(userID = userId.get.toInt)

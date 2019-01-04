@@ -1,6 +1,8 @@
 GET     /                                   controllers.HomeController.index
 
 GET     /hello                              controllers.HomeController.hello(name:String)
+GET     /google                             controllers.HomeController.google
+GET     /authenticate/:provider             controllers.SocialAuthController.authenticate(provider)
 
 GET     /sign-out                           controllers.HomeController.signOut
 

@@ -23,6 +23,10 @@ class HomeController @Inject()(
     Ok(views.html.hello(name))
   }
 
+  def google = Action { implicit request: Request[AnyContent] =>
+    Ok("google authenticated")
+  }
+
   def signOut = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
     val result = Redirect(routes.SignInController.view())
     silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))

@@ -23,4 +23,15 @@
     </div>
     <a href="@controllers.routes.SignUpController.view">Create Account</a>
   }
+
+  @if(socialProviders.providers.nonEmpty) {
+    <div class="social-providers">
+      <p>Use Existing Account to Sign-In</p>
+      <div>
+        @for(p <- socialProviders.providers) {
+        <a href="@controllers.routes.SocialAuthController.authenticate(p.id)" class="provider @p.id" title="@messages(p.id)">@p.id.capitalize login</a>
+        }
+      </div>
+    </div>
+  }
 }

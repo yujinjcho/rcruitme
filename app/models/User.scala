@@ -4,11 +4,11 @@ import com.mohiva.play.silhouette.api.{ Identity, LoginInfo }
 
 case class User(
   userID: Int,
-  firstName: Option[String],
+  firstName: String,
   credentialId: String,
-  lastName: Option[String],
+  lastName: String,
   userType: String,
-  email: Option[String]
+  email: String
 ) extends Identity {
-  def loginInfo: LoginInfo = LoginInfo(credentialId, email.get)
+  def loginInfo: LoginInfo = LoginInfo(credentialId, email)
 }

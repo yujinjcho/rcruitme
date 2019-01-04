@@ -19,22 +19,21 @@ class UserService @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext) ex
   def save(user: User): Future[User] = userDAO.save(user)
 
   def save(profile: CommonSocialProfile): Future[User] = {
-    userDAO.find(profile.loginInfo).flatMap {
-      case Some(user) =>
-        userDAO.save(user.copy(
-          firstName = profile.firstName,
-          lastName = profile.lastName,
-          email = profile.email
-        ))
-      case None =>
-        userDAO.save(User(
-          userID = 0,
-          credentialId = profile.loginInfo.providerID,
-          firstName = profile.firstName,
-          lastName = profile.lastName,
-          userType = "user_type",
-          email = profile.email
-        ))
+    userDAO.find(profile.loginInfo).flatMap { user =>
+      (user, profile) match {
+        // Assumes social profile (google) will have name and email
+        case (Some(u), CommonSocialProfile(_, Some(first), Some(last), _, Some(email), _)) =>
+          userDAO.save(u.copy(firstName = first, lastName = last, email = email))
+        case (None, CommonSocialProfile(loginInfo, Some(first), Some(last), _, Some(email), _)) =>
+          userDAO.save(User(
+            userID = 0,
+            credentialId = loginInfo.providerID,
+            firstName = first,
+            lastName = last,
+            userType = "user_type",
+            email = email
+          ))
+      }
     }
   }
 }

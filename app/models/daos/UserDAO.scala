@@ -41,7 +41,7 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
   def save(user: User): Future[User] = Future {
     val userId = db.withConnection { implicit conn =>
       user match {
-        case User(_, Some(first), credentialId, Some(last), userType, Some(email)) =>
+        case User(_, first, credentialId, last, userType, email) =>
           SQL(s"""
             INSERT INTO USERS
               (
@@ -75,7 +75,7 @@ object UserDAO {
     get[String]("email") ~
     get[String]("userType") map {
       case id~first~last~email~userType => {
-        User(id, Some(first), "credential_id", Some(last), userType, Some(email))}
+        User(id, first, "credential_id", last, userType, email)}
       // case _ => should throw some exception here?
     }
   }

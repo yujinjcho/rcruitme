@@ -20,7 +20,7 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
       val email = loginInfo.providerKey
       SQL(
         """
-          | SELECT id, first, last, email, type AS userType
+          | SELECT id, first, last, email, type AS userType, credential_id AS credentialId
           | FROM users
           | WHERE email = {email}
         """.stripMargin).on("email" -> email).as(userRowParser.singleOpt)
@@ -31,7 +31,7 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
     db.withConnection { implicit c =>
       SQL(
         """
-          | SELECT id, first, last, email, type AS userType
+          | SELECT id, first, last, email, type AS userType, credential_id AS credentialId
           | FROM user
           | WHERE id = {userId}
         """.stripMargin).on("userId" -> userID).as(userRowParser.single)
@@ -79,9 +79,10 @@ object UserDAO {
     get[String]("first") ~
     get[String]("last") ~
     get[String]("email") ~
+    get[String]("credentialId") ~
     get[String]("userType") map {
-      case id~first~last~email~userType => {
-        User(id, first, "credential_id", last, userType, email)}
+      case id~first~last~email~credentialId~userType => {
+        User(id, first, credentialId, last, userType, email)}
       // case _ => should throw some exception here?
     }
   }

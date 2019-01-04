@@ -81,8 +81,8 @@ object UserDAO {
     get[String]("email") ~
     get[String]("credentialId") ~
     get[String]("userType") map {
-      case id~first~last~email~credentialId~userType => {
-        User(id, first, credentialId, last, userType, email)}
+      case id~first~last~email~credentialId~userType =>
+        User(id, first, credentialId, last, userType, email)
       // case _ => should throw some exception here?
     }
   }

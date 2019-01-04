@@ -45,7 +45,7 @@ class SignUpController @Inject() (
               firstName = data.firstName,
               lastName = data.lastName,
               credentialId = loginInfo.providerID,
-              userType = CredentialsProvider.ID,
+              userType = "user_type_placeholder",
               email = data.email
             )
             for {

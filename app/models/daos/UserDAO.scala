@@ -48,18 +48,24 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
                 first,
                 last,
                 email,
-                type
+                type,
+                credential_id
               )
             VALUES
               (
                 {first},
                 {last},
                 {email},
-                {userType}
+                {userType},
+                {credentialId}
               )
           """)
-            .on("first" -> first, "last" -> last, "email" -> email, "userType" -> userType)
-            .executeInsert()
+            .on(
+              "first" -> first,
+              "last" -> last,
+              "email" -> email,
+              "userType" -> userType,
+              "credentialId" -> credentialId).executeInsert()
       }
     }
     user.copy(userID = userId.get.toInt)

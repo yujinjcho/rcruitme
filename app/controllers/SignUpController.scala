@@ -16,14 +16,14 @@ import models.{ DatabaseExecutionContext, User}
 import utils.auth.DefaultEnv
 
 class SignUpController @Inject() (
-  components: ControllerComponents,
+  cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
   passwordHasherRegistry: PasswordHasherRegistry,
   authInfoRepository: AuthInfoRepository,
   authTokenService: AuthTokenService,
   )(implicit ex: DatabaseExecutionContext)
-  extends AbstractController(components) with I18nSupport {
+  extends AbstractController(cc) with I18nSupport {
 
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     Future.successful(Ok(views.html.signUp(SignUpForm.form)))
@@ -38,7 +38,7 @@ class SignUpController @Inject() (
         userService.retrieve(loginInfo).flatMap {
           case Some(user) =>
             Future.successful(redirect.flashing("info" -> "Account exists already"))
-          case _ =>
+          case None =>
             val authInfo = passwordHasherRegistry.current.hash(data.password)
             val user = User(
               userID = 0,

@@ -10,7 +10,6 @@ import play.api.mvc._
 
 import utils.auth.DefaultEnv
 
-@Singleton
 class HomeController @Inject()(
   cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv]

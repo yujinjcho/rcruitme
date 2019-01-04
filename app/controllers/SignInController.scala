@@ -21,20 +21,20 @@ import models.services.UserService
 import utils.auth.DefaultEnv
 
 class SignInController @Inject() (
-  components: ControllerComponents,
+  cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   clock: Clock,
   configuration: Configuration,
   userService: UserService,
   credentialsProvider: CredentialsProvider,
   socialProviderRegistry: SocialProviderRegistry,
-)(implicit ex: ExecutionContext) extends AbstractController(components) with I18nSupport {
+)(implicit ex: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     Future.successful(Ok(views.html.signIn(SignInForm.form, socialProviderRegistry)))
   }
 
-  def submit = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignInForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
       data => {
@@ -45,19 +45,20 @@ class SignInController @Inject() (
             // TODO: handle non-activated users
             case Some(user) =>
               val c = configuration.underlying
-              silhouette.env.authenticatorService.create(loginInfo).map {
-                case authenticator if data.rememberMe =>
-                  authenticator.copy(
-                    expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
-                    idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
-                    cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
-                  )
-                case authenticator => authenticator
-              }.flatMap { authenticator =>
-                silhouette.env.eventBus.publish(LoginEvent(user, request))
-                silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                  silhouette.env.authenticatorService.embed(v, result)
-                }
+              silhouette.env.authenticatorService.create(loginInfo)
+                .map { authenticator =>
+                  if (!data.rememberMe)
+                    authenticator
+                  else
+                    authenticator.copy(
+                      expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
+                      idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
+                      cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
+                    )}
+                .flatMap { authenticator =>
+                  silhouette.env.eventBus.publish(LoginEvent(user, request))
+                  silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
+                    silhouette.env.authenticatorService.embed(v, result)}
               }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
           }

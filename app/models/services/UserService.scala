@@ -12,13 +12,13 @@ import models.daos.UserDAO
 
 class UserService @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext) extends IdentityService[User]  {
 
-  def retrieve(id: Int) = userDAO.find(id)
+  def retrieve(id: Int): Future[User] = userDAO.find(id)
 
   def retrieve(loginInfo: LoginInfo): Future[Option[User]] = userDAO.find(loginInfo)
 
-  def save(user: User) = userDAO.save(user)
+  def save(user: User): Future[User] = userDAO.save(user)
 
-  def save(profile: CommonSocialProfile) = {
+  def save(profile: CommonSocialProfile): Future[User] = {
     userDAO.find(profile.loginInfo).flatMap {
       case Some(user) =>
         userDAO.save(user.copy(

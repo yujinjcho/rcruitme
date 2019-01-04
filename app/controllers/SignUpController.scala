@@ -42,11 +42,11 @@ class SignUpController @Inject() (
             val authInfo = passwordHasherRegistry.current.hash(data.password)
             val user = User(
               userID = 0,
-              firstName = Some(data.firstName),
-              lastName = Some(data.lastName),
+              firstName = data.firstName,
+              lastName = data.lastName,
               credentialId = loginInfo.providerID,
               userType = "user_type_placeholder",
-              email = Some(data.email)
+              email = data.email
             )
             for {
               user <- userService.save(user)

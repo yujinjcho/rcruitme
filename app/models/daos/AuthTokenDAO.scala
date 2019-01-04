@@ -36,7 +36,7 @@ class AuthTokenDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext
           | FROM auth_tokens
           | WHERE expiry < TO_TIMESTAMP(${dateTime})
         """.stripMargin)
-        .on("dateTime" -> dateTime.getMillis() / 1000)
+        .on("dateTime" -> dateTime.getMillis / 1000)
         .as(authTokenRowParser.*).flatten
     }
   }
@@ -47,7 +47,7 @@ class AuthTokenDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext
         | INSERT INTO auth_tokens (user_id, expiry)
         | VALUES ( {userID}, TO_TIMESTAMP({expiry}) )
       """.stripMargin)
-        .on("userID" -> token.userID, "expiry" -> token.expiry.getMillis() / 1000)
+        .on("userID" -> token.userID, "expiry" -> token.expiry.getMillis / 1000)
         .executeInsert(SqlParser.scalar[UUID].singleOpt)
     }
     token.copy(id = authTokenId.get)

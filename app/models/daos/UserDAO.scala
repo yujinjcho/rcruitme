@@ -20,7 +20,7 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
       val email = loginInfo.providerKey
       SQL(
         """
-          | SELECT id, first, last, email, type AS userType
+          | SELECT id, first, last, email, type AS userType, credential_id AS credentialId
           | FROM users
           | WHERE email = {email}
         """.stripMargin).on("email" -> email).as(userRowParser.singleOpt)
@@ -31,7 +31,7 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
     db.withConnection { implicit c =>
       SQL(
         """
-          | SELECT id, first, last, email, type AS userType
+          | SELECT id, first, last, email, type AS userType, credential_id AS credentialId
           | FROM user
           | WHERE id = {userId}
         """.stripMargin).on("userId" -> userID).as(userRowParser.single)
@@ -41,25 +41,31 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
   def save(user: User): Future[User] = Future {
     val userId = db.withConnection { implicit conn =>
       user match {
-        case User(_, Some(first), credentialId, Some(last), userType, Some(email)) =>
+        case User(_, first, credentialId, last, userType, email) =>
           SQL(s"""
             INSERT INTO USERS
               (
                 first,
                 last,
                 email,
-                type
+                type,
+                credential_id
               )
             VALUES
               (
                 {first},
                 {last},
                 {email},
-                {userType}
+                {userType},
+                {credentialId}
               )
           """)
-            .on("first" -> first, "last" -> last, "email" -> email, "userType" -> userType)
-            .executeInsert()
+            .on(
+              "first" -> first,
+              "last" -> last,
+              "email" -> email,
+              "userType" -> userType,
+              "credentialId" -> credentialId).executeInsert()
       }
     }
     user.copy(userID = userId.get.toInt)
@@ -73,9 +79,10 @@ object UserDAO {
     get[String]("first") ~
     get[String]("last") ~
     get[String]("email") ~
+    get[String]("credentialId") ~
     get[String]("userType") map {
-      case id~first~last~email~userType => {
-        User(id, Some(first), "credential_id", Some(last), userType, Some(email))}
+      case id~first~last~email~credentialId~userType =>
+        User(id, first, credentialId, last, userType, email)
       // case _ => should throw some exception here?
     }
   }

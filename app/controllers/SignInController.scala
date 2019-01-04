@@ -40,7 +40,7 @@ class SignInController @Inject() (
       data => {
         val credentials = Credentials(data.email, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-          val result = Redirect(routes.HomeController.index())
+          val result = Redirect(routes.HomeController.hello("world"))
           userService.retrieve(loginInfo).flatMap {
             // TODO: handle non-activated users
             case Some(user) =>
@@ -52,12 +52,12 @@ class SignInController @Inject() (
                   else
                     authenticator.copy(
                       expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
-                      idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
-                      cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
+                      idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout")
                     )}
                 .flatMap { authenticator =>
                   silhouette.env.eventBus.publish(LoginEvent(user, request))
                   silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
+                    println(s"JWT_TOKEN: ${v.toString}")
                     silhouette.env.authenticatorService.embed(v, result)}
               }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))

@@ -7,3 +7,9 @@ Hello World
 ```
 sbt run
 ```
+
+## Stylecheck
+
+```
+sbt scalastyle
+```

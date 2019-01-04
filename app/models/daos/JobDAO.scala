@@ -14,12 +14,12 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
 
-  private val parameters = Macro.toParameters[Job]
+  implicit private val parameters = Macro.toParameters[Job]
 
   def create(job: Job): Future[Option[Long]] = Future {
     db.withConnection { implicit conn =>
       SQL("""
-        insert into jobs
+        INSERT INTO jobs
           (
             role,
             company,
@@ -31,7 +31,7 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
             viewed,
             submitted_at
           )
-        values
+        VALUES
           (
             {role},
             {company},
@@ -43,8 +43,7 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
             {viewed},
             {submittedAt}
           )
-      """).bind(job)(parameters).executeInsert()
+      """).bind(job).executeInsert()
     }
-  }(ec)
-
+  }
 }

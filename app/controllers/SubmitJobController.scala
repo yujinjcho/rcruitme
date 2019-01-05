@@ -3,6 +3,7 @@ package controllers
 import javax.inject._
 import play.api._
 import play.api.i18n.I18nSupport
+import play.api.libs.json.Json
 import play.api.mvc._
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -21,7 +22,7 @@ class SubmitJobController @Inject()(
 
   def submit() = Action.async { implicit request: Request[AnyContent] =>
     JobForm.form.bindFromRequest.fold(
-      form => Future(BadRequest(views.html.submitJob(form))),
+      form => Future.successful(BadRequest(form.errorsAsJson)),
       data => {
         val job = Job(
           role = data.role,
@@ -32,9 +33,7 @@ class SubmitJobController @Inject()(
           description = data.description,
           benefits = data.benefits
         )
-        jobDAO.create(job).map { _ =>
-          Redirect(routes.SubmitJobController.view()).flashing("info" -> "Job submitted.")
-        }
+        jobDAO.create(job).map { job => Created(Json.toJson(job)) }
       }
     )
   }

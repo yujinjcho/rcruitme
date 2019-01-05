@@ -21,7 +21,7 @@ import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepo
 
 import play.api.Configuration
 import play.api.libs.ws.WSClient
-import play.api.mvc.{ Cookie, CookieHeaderEncoding }
+import play.api.mvc.Cookie
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
@@ -68,7 +68,7 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
   @Provides
   def provideEnvironment(
     userService: UserService,
-    authenticatorService: AuthenticatorService[CookieAuthenticator],
+    authenticatorService: AuthenticatorService[JWTAuthenticator],
     eventBus: EventBus): Environment[DefaultEnv] = {
 
     Environment[DefaultEnv](
@@ -91,13 +91,6 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.authenticator.crypter")
 
     new JcaCrypter(config)
-  }
-
-  @Provides @Named("authenticator-signer")
-  def provideAuthenticatorSigner(configuration: Configuration): Signer = {
-    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.authenticator.signer")
-
-    new JcaSigner(config)
   }
 
   @Provides
@@ -176,17 +169,14 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
 
   @Provides
   def provideAuthenticatorService(
-    @Named("authenticator-signer") signer: Signer,
     @Named("authenticator-crypter") crypter: Crypter,
-    cookieHeaderEncoding: CookieHeaderEncoding,
-    fingerprintGenerator: FingerprintGenerator,
     idGenerator: IDGenerator,
     configuration: Configuration,
-    clock: Clock): AuthenticatorService[CookieAuthenticator] = {
+    clock: Clock): AuthenticatorService[JWTAuthenticator] = {
 
-    val config = configuration.underlying.as[CookieAuthenticatorSettings]("silhouette.authenticator")
+    val config = JWTAuthenticatorSettings(sharedSecret = configuration.get[String]("play.http.secret.key"))
     val authenticatorEncoder = new CrypterAuthenticatorEncoder(crypter)
 
-    new CookieAuthenticatorService(config, None, signer, cookieHeaderEncoding, authenticatorEncoder, fingerprintGenerator, idGenerator, clock)
+    new JWTAuthenticatorService(config, None, authenticatorEncoder, idGenerator, clock)
   }
 }

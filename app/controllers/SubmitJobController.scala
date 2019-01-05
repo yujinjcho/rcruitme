@@ -16,10 +16,6 @@ class SubmitJobController @Inject()(
   jobDAO: JobDAO
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
-  def view = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.submitJob(JobForm.form))
-  }
-
   def submit() = Action.async { implicit request: Request[AnyContent] =>
     JobForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(form.errorsAsJson)),

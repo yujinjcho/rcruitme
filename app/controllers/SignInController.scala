@@ -57,7 +57,6 @@ class SignInController @Inject() (
                 .flatMap { authenticator =>
                   silhouette.env.eventBus.publish(LoginEvent(user, request))
                   silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                    println(s"JWT_TOKEN: ${v.toString}")
                     silhouette.env.authenticatorService.embed(v, result)}
               }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))

@@ -5,10 +5,15 @@ import com.mohiva.play.silhouette.api.{ Identity, LoginInfo }
 case class User(
   userID: Int,
   firstName: String,
-  credentialId: String,
+  googleKey: Option[String] = None,
   lastName: String,
   userType: String,
   email: String
 ) extends Identity {
-  def loginInfo: LoginInfo = LoginInfo(credentialId, email)
+  def loginInfo: LoginInfo = {
+    googleKey match {
+      case Some(key) => LoginInfo("google", key)
+      case None => LoginInfo("credentials", email)
+    }
+  }
 }

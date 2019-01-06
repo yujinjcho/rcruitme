@@ -8,6 +8,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import javax.inject.Inject
 import play.api.i18n.{ I18nSupport, Messages }
+import play.api.libs.json._
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
 import models.services.UserService
@@ -33,7 +34,7 @@ class SocialAuthController @Inject() (
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
             value <- silhouette.env.authenticatorService.init(authenticator)
-            result <- silhouette.env.authenticatorService.embed(value, Redirect(routes.HomeController.google))
+            result <- silhouette.env.authenticatorService.embed(value, Redirect("http://localhost:3000"))
           } yield {
             silhouette.env.eventBus.publish(LoginEvent(user, request))
             result
@@ -43,7 +44,7 @@ class SocialAuthController @Inject() (
     }).recover {
       case e: ProviderException =>
         logger.error("Unexpected provider error", e)
-        Redirect(routes.SignInController.view()).flashing("error" -> Messages("could.not.authenticate"))
+        BadRequest(Json.obj("errors" -> Messages("invalid.credentials")))
     }
   }
 }

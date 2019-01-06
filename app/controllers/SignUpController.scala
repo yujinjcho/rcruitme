@@ -11,7 +11,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
 import forms.SignUpForm
-import models.services.{ AuthTokenService, UserService }
+import models.services.UserService
 import models.{ DatabaseExecutionContext, User}
 import utils.auth.DefaultEnv
 
@@ -20,8 +20,7 @@ class SignUpController @Inject() (
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
   passwordHasherRegistry: PasswordHasherRegistry,
-  authInfoRepository: AuthInfoRepository,
-  authTokenService: AuthTokenService,
+  authInfoRepository: AuthInfoRepository
   )(implicit ex: DatabaseExecutionContext)
   extends AbstractController(cc) with I18nSupport {
 
@@ -36,6 +35,13 @@ class SignUpController @Inject() (
         val redirect = Redirect(routes.SignUpController.view())
         val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
         userService.retrieve(loginInfo).flatMap {
+          case Some(user) if user.googleKey.isDefined =>
+            val authInfo = passwordHasherRegistry.current.hash(data.password)
+            for {
+              authInfo <- authInfoRepository.add(loginInfo, authInfo)
+            } yield {
+              redirect.flashing("info" -> "Synced to existing account")
+            }
           case Some(user) =>
             Future.successful(redirect.flashing("info" -> "Account exists already"))
           case None =>
@@ -44,14 +50,12 @@ class SignUpController @Inject() (
               userID = 0,
               firstName = data.firstName,
               lastName = data.lastName,
-              credentialId = loginInfo.providerID,
               userType = "user_type_placeholder",
               email = data.email
             )
             for {
               user <- userService.save(user)
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
-              authToken <- authTokenService.create(user.userID)
             } yield {
               // TODO: send activation email
               silhouette.env.eventBus.publish(SignUpEvent(user, request))

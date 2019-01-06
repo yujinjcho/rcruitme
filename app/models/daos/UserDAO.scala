@@ -15,23 +15,27 @@ import models.daos.UserDAO._
 class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
 
+  implicit private val parameters = Macro.toParameters[User]
+
   def find(loginInfo: LoginInfo): Future[Option[User]] = Future {
+    // Assumes providerID can only be "google" or "credentials" (password-based)
+    val providerKey = if (loginInfo.providerID == "google") "google_key" else "email"
     db.withConnection { implicit c =>
-      val email = loginInfo.providerKey
       SQL(
-        """
-          | SELECT id, first, last, email, type AS userType, credential_id AS credentialId
+        s"""
+          | SELECT id, first, last, email, type AS userType, google_key AS googleKey
           | FROM users
-          | WHERE email = {email}
-        """.stripMargin).on("email" -> email).as(userRowParser.singleOpt)
+          | WHERE $providerKey = {providerKey}
+        """.stripMargin).on("providerKey" -> loginInfo.providerKey).as(userRowParser.singleOpt)
     }
   }
+
 
   def find(userID: Int): Future[User] = Future {
     db.withConnection { implicit c =>
       SQL(
         """
-          | SELECT id, first, last, email, type AS userType, credential_id AS credentialId
+          | SELECT id, first, last, email, type AS userType, google_key AS googleKey
           | FROM user
           | WHERE id = {userId}
         """.stripMargin).on("userId" -> userID).as(userRowParser.single)
@@ -40,35 +44,54 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   def save(user: User): Future[User] = Future {
     val userId = db.withConnection { implicit conn =>
-      user match {
-        case User(_, first, credentialId, last, userType, email) =>
-          SQL(s"""
-            INSERT INTO USERS
-              (
-                first,
-                last,
-                email,
-                type,
-                credential_id
-              )
-            VALUES
-              (
-                {first},
-                {last},
-                {email},
-                {userType},
-                {credentialId}
-              )
-          """)
-            .on(
-              "first" -> first,
-              "last" -> last,
-              "email" -> email,
-              "userType" -> userType,
-              "credentialId" -> credentialId).executeInsert()
-      }
+      SQL(s"""
+        INSERT INTO users
+          (
+            first,
+            last,
+            email,
+            type,
+            google_key
+          )
+        VALUES
+          (
+            {firstName},
+            {lastName},
+            {email},
+            {userType},
+            {googleKey}
+          )
+      """).bind(user).executeInsert()
     }
     user.copy(userID = userId.get.toInt)
+  }
+
+  def update(user: User): Future[User] = Future {
+    val rowsUpdated : Int = db.withConnection { implicit conn =>
+      SQL("""
+        UPDATE users
+          SET
+            first = {firstName},
+            last = {lastName},
+            type = {userType},
+            google_key = {googleKey}
+          WHERE
+            id = {userID}
+      """).bind(user).executeUpdate()
+    }
+    user
+  }
+
+
+  def findByEmail(email: String): Future[Option[User]] = Future {
+    db.withConnection { implicit c =>
+      SQL(
+        s"""
+          | SELECT id, first, last, email, type AS userType, google_key AS googleKey
+          | FROM users
+          | WHERE email = {email}
+        """.stripMargin).on("email" -> email).as(userRowParser.singleOpt)
+    }
   }
 }
 
@@ -79,10 +102,10 @@ object UserDAO {
     get[String]("first") ~
     get[String]("last") ~
     get[String]("email") ~
-    get[String]("credentialId") ~
+    get[Option[String]]("googleKey") ~
     get[String]("userType") map {
-      case id~first~last~email~credentialId~userType =>
-        User(id, first, credentialId, last, userType, email)
+      case id~first~last~email~googleKey~userType =>
+        User(id, first, googleKey, last, userType, email)
       // case _ => should throw some exception here?
     }
   }

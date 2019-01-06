@@ -15,6 +15,8 @@ import models.daos.UserDAO._
 class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
 
+  implicit private val parameters = Macro.toParameters[User]
+
   def find(loginInfo: LoginInfo): Future[Option[User]] = Future {
     // Assumes providerID can only be "google" or "credentials" (password-based)
     val providerKey = if (loginInfo.providerID == "google") "google_key" else "email"
@@ -42,61 +44,43 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   def save(user: User): Future[User] = Future {
     val userId = db.withConnection { implicit conn =>
-      user match {
-        case User(_, first, googleKey, last, userType, email) =>
-          SQL(s"""
-            INSERT INTO users
-              (
-                first,
-                last,
-                email,
-                type,
-                google_key
-              )
-            VALUES
-              (
-                {first},
-                {last},
-                {email},
-                {userType},
-                {googleKey}
-              )
-          """)
-            .on(
-              "first" -> first,
-              "last" -> last,
-              "email" -> email,
-              "userType" -> userType,
-              "googleKey" -> googleKey).executeInsert()
-      }
+      SQL(s"""
+        INSERT INTO users
+          (
+            first,
+            last,
+            email,
+            type,
+            google_key
+          )
+        VALUES
+          (
+            {firstName},
+            {lastName},
+            {email},
+            {userType},
+            {googleKey}
+          )
+      """).bind(user).executeInsert()
     }
     user.copy(userID = userId.get.toInt)
   }
 
   def update(user: User): Future[User] = Future {
-    val userId = db.withConnection { implicit conn =>
-      user match {
-        case User(userId, first, googleKey, last, userType, email) =>
-          SQL(s"""
-            UPDATE users
-              SET
-                first = {first},
-                last = {last},
-                type = {userType},
-                google_key = {googleKey}
-              WHERE
-                id = {userId}
-          """)
-            .on(
-              "first" -> first,
-              "last" -> last,
-              "userType" -> userType,
-              "googleKey" -> googleKey,
-              "userId" -> userId
-            ).executeInsert()
-      }
+    val rowsUpdated : Int = db.withConnection { implicit conn =>
+      SQL("""
+        UPDATE users
+          SET
+            first = {firstName},
+            last = {lastName},
+            type = {userType},
+            google_key = {googleKey}
+          WHERE
+            id = {userID}
+      """)
+        .bind(user).executeUpdate()
     }
-    user.copy(userID = userId.get.toInt)
+    user
   }
 
 

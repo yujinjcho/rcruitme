@@ -14,13 +14,13 @@ import models.services.UserService
 import utils.auth.DefaultEnv
 
 class SocialAuthController @Inject() (
-    components: ControllerComponents,
+    cc: ControllerComponents,
     silhouette: Silhouette[DefaultEnv],
     userService: UserService,
     authInfoRepository: AuthInfoRepository,
     socialProviderRegistry: SocialProviderRegistry
   )(implicit ex: ExecutionContext)
-  extends AbstractController(components) with I18nSupport with Logger {
+  extends AbstractController(cc) with I18nSupport with Logger {
 
   def authenticate(provider: String) = Action.async { implicit request: Request[AnyContent] =>
     (socialProviderRegistry.get[SocialProvider](provider) match {
@@ -30,7 +30,7 @@ class SocialAuthController @Inject() (
           case Right(authInfo) => for {
             profile <- p.retrieveProfile(authInfo)
             user <- userService.save(profile)
-            authInfo <- authInfoRepository.save(profile.loginInfo, authInfo)
+            _ <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
             value <- silhouette.env.authenticatorService.init(authenticator)
             result <- silhouette.env.authenticatorService.embed(value, Redirect(routes.HomeController.google))

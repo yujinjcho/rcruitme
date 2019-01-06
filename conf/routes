@@ -6,7 +6,6 @@ GET     /authenticate/:provider             controllers.SocialAuthController.aut
 
 GET     /sign-out                           controllers.HomeController.signOut
 
-GET     /submit-job                         controllers.SubmitJobController.view
 POST    /submit-job                         controllers.SubmitJobController.submit
 
 GET     /sign-in                            controllers.SignInController.view

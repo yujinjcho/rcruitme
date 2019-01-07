@@ -31,16 +31,23 @@ class SignInController @Inject() (
   socialProviderRegistry: SocialProviderRegistry,
 )(implicit ex: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
+  implicit val socialProviderWrite = new Writes[SocialProvider] {
+    def writes(provider: SocialProvider) = Json.obj(
+      "id" -> JsString(provider.id),
+      "href" -> JsString(configuration.underlying.as[String](s"silhouette.${provider.id}.redirectURL"))
+    )
+  }
+
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     Future.successful(Ok(Json.obj(
-      "providers" -> Json.toJson(socialProviderRegistry.providers)(socialProvidersWrite())
+      "providers" -> Json.toJson(socialProviderRegistry.providers)
     )))
   }
 
   def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignInForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(Json.obj(
-        "providers" -> Json.toJson(socialProviderRegistry.providers)(socialProvidersWrite()),
+        "providers" -> Json.toJson(socialProviderRegistry.providers),
         "errors" -> form.errorsAsJson
       ))),
       data => {
@@ -72,19 +79,12 @@ class SignInController @Inject() (
         }.recover {
           case _: ProviderException =>
             BadRequest(Json.obj(
-              "providers" -> Json.toJson(socialProviderRegistry.providers)(socialProvidersWrite()),
+              "providers" -> Json.toJson(socialProviderRegistry.providers),
               "errors" -> Messages("invalid.credentials")
             ))
         }
       }
     )
-  }
-
-  private def socialProvidersWrite()(implicit request: Request[AnyContent]) = new Writes[Seq[SocialProvider]] {
-    def writes(providers: Seq[SocialProvider]) = Json.toJson(providers.map(provider => Json.obj(
-      "id" -> JsString(provider.id),
-      "href" -> JsString(controllers.routes.SocialAuthController.authenticate(provider.id).absoluteURL)
-    )))
   }
 
 }

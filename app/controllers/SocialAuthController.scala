@@ -6,6 +6,7 @@ import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
+import com.mohiva.play.silhouette.impl.providers.state.UserStateItem
 import javax.inject.Inject
 import play.api.i18n.{ I18nSupport, Messages }
 import play.api.libs.json._
@@ -24,17 +25,17 @@ class SocialAuthController @Inject() (
   extends AbstractController(cc) with I18nSupport with Logger {
 
   def authenticate(provider: String) = Action.async { implicit request: Request[AnyContent] =>
-    (socialProviderRegistry.get[SocialProvider](provider) match {
-      case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
-        p.authenticate().flatMap {
+    (socialProviderRegistry.get[SocialStateProvider](provider) match {
+      case Some(p: SocialStateProvider with CommonSocialProfileBuilder) =>
+        p.authenticate(UserStateItem(Map("redirect" -> redirectParam))).flatMap {
           case Left(result) => Future.successful(result)
-          case Right(authInfo) => for {
+          case Right(StatefulAuthInfo(authInfo, userState)) => for {
             profile <- p.retrieveProfile(authInfo)
             user <- userService.save(profile)
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
             value <- silhouette.env.authenticatorService.init(authenticator)
-            result <- silhouette.env.authenticatorService.embed(value, Redirect("http://localhost:3000"))
+            result <- silhouette.env.authenticatorService.embed(value, Redirect(userState.state("redirect")))
           } yield {
             silhouette.env.eventBus.publish(LoginEvent(user, request))
             result
@@ -47,4 +48,8 @@ class SocialAuthController @Inject() (
         BadRequest(Json.obj("errors" -> Messages("invalid.credentials")))
     }
   }
+
+  private def redirectParam()(implicit request: Request[AnyContent]): String =
+    request.queryString.getOrElse("redirect", Seq(""))(0)
+
 }

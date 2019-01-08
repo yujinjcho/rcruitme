@@ -2,7 +2,7 @@ GET     /                                   controllers.HomeController.index
 
 GET     /hello                              controllers.HomeController.hello(name:String)
 GET     /google                             controllers.HomeController.google
-GET     /authenticate/:provider             controllers.SocialAuthController.authenticate(provider)
+GET     /authenticate/:provider             controllers.SocialAuthController.authenticate(provider, redirect:Option[String])
 
 GET     /sign-out                           controllers.HomeController.signOut
 

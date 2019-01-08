@@ -8,7 +8,8 @@ case class User(
   googleKey: Option[String] = None,
   lastName: String,
   userType: String,
-  email: String
+  email: String,
+  activated: Boolean = false
 ) extends Identity {
   def loginInfo: LoginInfo = {
     googleKey match {

@@ -23,8 +23,7 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
     db.withConnection { implicit c =>
       SQL(
         s"""
-          | SELECT id, first, last, email, type AS userType, google_key AS googleKey
-          | FROM users
+          | $selectUserModelFields
           | WHERE $providerKey = {providerKey}
         """.stripMargin).on("providerKey" -> loginInfo.providerKey).as(userRowParser.singleOpt)
     }
@@ -34,9 +33,8 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
   def find(userID: Int): Future[User] = Future {
     db.withConnection { implicit c =>
       SQL(
-        """
-          | SELECT id, first, last, email, type AS userType, google_key AS googleKey
-          | FROM user
+        s"""
+          | $selectUserModelFields
           | WHERE id = {userId}
         """.stripMargin).on("userId" -> userID).as(userRowParser.single)
     }
@@ -51,7 +49,8 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
             last,
             email,
             type,
-            google_key
+            google_key,
+            activated
           )
         VALUES
           (
@@ -59,7 +58,8 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
             {lastName},
             {email},
             {userType},
-            {googleKey}
+            {googleKey},
+            {activated}
           )
       """).bind(user).executeInsert()
     }
@@ -87,8 +87,7 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
     db.withConnection { implicit c =>
       SQL(
         s"""
-          | SELECT id, first, last, email, type AS userType, google_key AS googleKey
-          | FROM users
+          | $selectUserModelFields
           | WHERE email = {email}
         """.stripMargin).on("email" -> email).as(userRowParser.singleOpt)
     }
@@ -103,10 +102,24 @@ object UserDAO {
     get[String]("last") ~
     get[String]("email") ~
     get[Option[String]]("googleKey") ~
-    get[String]("userType") map {
-      case id~first~last~email~googleKey~userType =>
-        User(id, first, googleKey, last, userType, email)
+    get[String]("userType") ~
+    get[Boolean]("activated") map {
+      case id~first~last~email~googleKey~userType~activated =>
+        User(id, first, googleKey, last, userType, email, activated)
       // case _ => should throw some exception here?
     }
   }
+
+  val selectUserModelFields =
+    """
+      | SELECT
+      |   id,
+      |   first,
+      |   last,
+      |   email,
+      |   type AS userType,
+      |   google_key AS googleKey,
+      |   activated
+      | FROM users
+     """.stripMargin
 }

@@ -7,7 +7,8 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import javax.inject.Inject
-import play.api.i18n.I18nSupport
+import play.api.i18n.{ I18nSupport, Messages }
+import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
 import forms.SignUpForm
@@ -20,7 +21,8 @@ class SignUpController @Inject() (
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
   passwordHasherRegistry: PasswordHasherRegistry,
-  authInfoRepository: AuthInfoRepository
+  authInfoRepository: AuthInfoRepository,
+  mailerClient: MailerClient,
   )(implicit ex: DatabaseExecutionContext)
   extends AbstractController(cc) with I18nSupport {
 
@@ -58,6 +60,14 @@ class SignUpController @Inject() (
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
             } yield {
               // TODO: send activation email
+              val url = "test"
+              mailerClient.send(Email(
+                subject = Messages("email.sign.up.subject"),
+                from = Messages("email.from"),
+                to = Seq(data.email),
+                bodyText = Some(views.txt.emails.signUp(user, url).body),
+                bodyHtml = Some(views.html.emails.signUp(user, url).body)
+              ))
               silhouette.env.eventBus.publish(SignUpEvent(user, request))
               redirect.flashing("info" -> "Email confirmation has been sent")
             }

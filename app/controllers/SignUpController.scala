@@ -22,12 +22,7 @@ class SignUpController @Inject() (
   userService: UserService,
   passwordHasherRegistry: PasswordHasherRegistry,
   authInfoRepository: AuthInfoRepository
-  )(implicit ex: DatabaseExecutionContext)
-  extends AbstractController(cc) with I18nSupport {
-
-  def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    Future.successful(Ok(views.html.signUp(SignUpForm.form)))
-  }
+)(implicit ex: DatabaseExecutionContext) extends AbstractController(cc) with I18nSupport {
 
   def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignUpForm.form.bindFromRequest.fold(

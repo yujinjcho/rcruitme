@@ -14,6 +14,7 @@ import javax.inject.Inject
 import net.ceedubs.ficus.Ficus._
 import play.api.Configuration
 import play.api.i18n.{ I18nSupport, Messages }
+import play.api.libs.json._
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
 import forms.SignInForm
@@ -30,17 +31,28 @@ class SignInController @Inject() (
   socialProviderRegistry: SocialProviderRegistry,
 )(implicit ex: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
+  implicit val socialProviderWrite = new Writes[SocialProvider] {
+    def writes(provider: SocialProvider) = Json.obj(
+      "id" -> JsString(provider.id),
+      "href" -> JsString(configuration.underlying.as[String](s"silhouette.${provider.id}.redirectURL"))
+    )
+  }
+
   def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    Future.successful(Ok(views.html.signIn(SignInForm.form, socialProviderRegistry)))
+    Future.successful(Ok(Json.obj(
+      "providers" -> Json.toJson(socialProviderRegistry.providers)
+    )))
   }
 
   def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignInForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
+      form => Future.successful(BadRequest(Json.obj(
+        "providers" -> Json.toJson(socialProviderRegistry.providers),
+        "errors" -> form.errorsAsJson
+      ))),
       data => {
         val credentials = Credentials(data.email, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-          val result = Redirect(routes.HomeController.hello("world"))
           userService.retrieve(loginInfo).flatMap {
             // TODO: handle non-activated users
             case Some(user) =>
@@ -57,15 +69,22 @@ class SignInController @Inject() (
                 .flatMap { authenticator =>
                   silhouette.env.eventBus.publish(LoginEvent(user, request))
                   silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                    silhouette.env.authenticatorService.embed(v, result)}
+                    silhouette.env.authenticatorService.embed(v, Ok(Json.obj(
+                      "result" -> "success"
+                    )))
+                  }
               }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
           }
         }.recover {
           case _: ProviderException =>
-            Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
+            BadRequest(Json.obj(
+              "providers" -> Json.toJson(socialProviderRegistry.providers),
+              "errors" -> Messages("invalid.credentials")
+            ))
         }
       }
     )
   }
+
 }

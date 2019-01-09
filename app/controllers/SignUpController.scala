@@ -8,6 +8,7 @@ import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
+import play.api.libs.json._
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
 import forms.SignUpForm
@@ -21,18 +22,12 @@ class SignUpController @Inject() (
   userService: UserService,
   passwordHasherRegistry: PasswordHasherRegistry,
   authInfoRepository: AuthInfoRepository
-  )(implicit ex: DatabaseExecutionContext)
-  extends AbstractController(cc) with I18nSupport {
-
-  def view = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    Future.successful(Ok(views.html.signUp(SignUpForm.form)))
-  }
+)(implicit ex: DatabaseExecutionContext) extends AbstractController(cc) with I18nSupport {
 
   def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignUpForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signUp(form))),
+      form => Future.successful(BadRequest(form.errorsAsJson)),
       data => {
-        val redirect = Redirect(routes.SignUpController.view())
         val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
         userService.retrieve(loginInfo).flatMap {
           case Some(user) if user.googleKey.isDefined =>
@@ -40,10 +35,10 @@ class SignUpController @Inject() (
             for {
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
             } yield {
-              redirect.flashing("info" -> "Synced to existing account")
+              Ok(Json.obj("message" -> "Synced to existing account"))
             }
           case Some(user) =>
-            Future.successful(redirect.flashing("info" -> "Account exists already"))
+            Future.successful(Ok(Json.obj("message" -> "Account exists already")))
           case None =>
             val authInfo = passwordHasherRegistry.current.hash(data.password)
             val user = User(
@@ -59,7 +54,7 @@ class SignUpController @Inject() (
             } yield {
               // TODO: send activation email
               silhouette.env.eventBus.publish(SignUpEvent(user, request))
-              redirect.flashing("info" -> "Email confirmation has been sent")
+              Ok(Json.obj("message" -> "Email confirmation has been sent"))
             }
         }
       }

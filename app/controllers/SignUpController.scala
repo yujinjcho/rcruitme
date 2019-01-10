@@ -33,9 +33,8 @@ class SignUpController @Inject() (
 
   def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignUpForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signUp(form))),
+      form => Future.successful(BadRequest(form.errorsAsJson)),
       data => {
-        val redirect = Redirect(routes.SignUpController.view())
         val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
         userService.retrieve(loginInfo).flatMap {
           case Some(user) if user.googleKey.isDefined =>
@@ -43,10 +42,10 @@ class SignUpController @Inject() (
             for {
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
             } yield {
-              redirect.flashing("info" -> "Synced to existing account")
+              Ok(Json.obj("message" -> "Synced to existing account"))
             }
           case Some(user) =>
-            Future.successful(redirect.flashing("info" -> "Account exists already"))
+            Future.successful(Ok(Json.obj("message" -> "Account exists already")))
           case None =>
             val authInfo = passwordHasherRegistry.current.hash(data.password)
             val user = User(

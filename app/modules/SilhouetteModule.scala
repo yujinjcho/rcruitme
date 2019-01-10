@@ -10,6 +10,7 @@ import com.mohiva.play.silhouette.api.services._
 import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api.{ Environment, EventBus, Silhouette, SilhouetteProvider }
 import com.mohiva.play.silhouette.crypto.{ JcaCrypter, JcaCrypterSettings, JcaSigner, JcaSignerSettings }
+import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticatorService
 import com.mohiva.play.silhouette.impl.authenticators._
 import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.providers.oauth2._
@@ -168,15 +169,24 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
   }
 
   @Provides
+  def provideJWTAuthenticatorSettings(configuration: Configuration): JWTAuthenticatorSettings = {
+    JWTAuthenticatorSettings(sharedSecret = configuration.get[String]("play.http.secret.key"))
+  }
+
+  @Provides
+  def providesCrypterAuthenticationEncoder(@Named("authenticator-crypter") crypter: Crypter): CrypterAuthenticatorEncoder = {
+
+    new CrypterAuthenticatorEncoder(crypter)
+  }
+
+  @Provides
   def provideAuthenticatorService(
-    @Named("authenticator-crypter") crypter: Crypter,
     idGenerator: IDGenerator,
-    configuration: Configuration,
-    clock: Clock): AuthenticatorService[JWTAuthenticator] = {
+    settings: JWTAuthenticatorSettings,
+    authenticatorEncoder: CrypterAuthenticatorEncoder,
+    clock: Clock
+  ): AuthenticatorService[JWTAuthenticator] = {
 
-    val config = JWTAuthenticatorSettings(sharedSecret = configuration.get[String]("play.http.secret.key"))
-    val authenticatorEncoder = new CrypterAuthenticatorEncoder(crypter)
-
-    new JWTAuthenticatorService(config, None, authenticatorEncoder, idGenerator, clock)
+    new JWTAuthenticatorService(settings, None, authenticatorEncoder, idGenerator, clock)
   }
 }

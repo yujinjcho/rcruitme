@@ -10,6 +10,7 @@ import com.mohiva.play.silhouette.impl.providers.state.UserStateItem
 import javax.inject.Inject
 import play.api.i18n.{ I18nSupport, Messages }
 import play.api.libs.json._
+import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
 import models.services.UserService
@@ -20,7 +21,8 @@ class SocialAuthController @Inject() (
     silhouette: Silhouette[DefaultEnv],
     userService: UserService,
     authInfoRepository: AuthInfoRepository,
-    socialProviderRegistry: SocialProviderRegistry
+    socialProviderRegistry: SocialProviderRegistry,
+    mailerClient: MailerClient,
   )(implicit ex: ExecutionContext)
   extends AbstractController(cc) with I18nSupport with Logger {
 
@@ -34,9 +36,20 @@ class SocialAuthController @Inject() (
             user <- userService.save(profile)
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
-            value <- silhouette.env.authenticatorService.init(authenticator)
-            result <- silhouette.env.authenticatorService.embed(value, Redirect(userState.state("redirect")))
+            token <- silhouette.env.authenticatorService.init(authenticator)
+            result <- silhouette.env.authenticatorService.embed(token, Redirect(userState.state("redirect")))
           } yield {
+
+            val url = routes.ActivateAccountController.activate(token).absoluteURL()
+            if (!user.activated) {
+              mailerClient.send(Email(
+                subject = Messages("email.sign.up.subject"),
+                from = Messages("email.from"),
+                to = Seq(user.email),
+                bodyText = Some(views.txt.emails.signUp(user, url).body),
+                bodyHtml = Some(views.html.emails.signUp(user, url).body)
+              ))
+            }
             silhouette.env.eventBus.publish(LoginEvent(user, request))
             result
           }

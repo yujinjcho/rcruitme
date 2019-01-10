@@ -74,7 +74,8 @@ class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
             first = {firstName},
             last = {lastName},
             type = {userType},
-            google_key = {googleKey}
+            google_key = {googleKey},
+            activated = {activated}
           WHERE
             id = {userID}
       """).bind(user).executeUpdate()

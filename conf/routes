@@ -13,3 +13,5 @@ POST    /sign-in                            controllers.SignInController.submit
 
 GET     /sign-up                            controllers.SignUpController.view
 POST    /sign-up                            controllers.SignUpController.submit
+
+GET     /activate/:token                    controllers.ActivateAccountController.activate(token)

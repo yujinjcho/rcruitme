@@ -8,6 +8,7 @@ import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import javax.inject.Inject
 import play.api.i18n.{ I18nSupport, Messages }
+import play.api.libs.json._
 import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
@@ -58,18 +59,22 @@ class SignUpController @Inject() (
             for {
               user <- userService.save(user)
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
+              authenticator <- silhouette.env.authenticatorService.create(loginInfo)
+              token <- silhouette.env.authenticatorService.init(authenticator)
             } yield {
-              // TODO: send activation email
-              val url = "test"
-              mailerClient.send(Email(
-                subject = Messages("email.sign.up.subject"),
-                from = Messages("email.from"),
-                to = Seq(data.email),
-                bodyText = Some(views.txt.emails.signUp(user, url).body),
-                bodyHtml = Some(views.html.emails.signUp(user, url).body)
-              ))
+
+              val url = routes.ActivateAccountController.activate(token).absoluteURL()
+              mailerClient.send(
+                Email(
+                  subject = Messages("email.sign.up.subject"),
+                  from = Messages("email.from"),
+                  to = Seq(data.email),
+                  bodyText = Some(views.txt.emails.signUp(user, url).body),
+                  bodyHtml = Some(views.html.emails.signUp(user, url).body)
+                )
+              )
               silhouette.env.eventBus.publish(SignUpEvent(user, request))
-              redirect.flashing("info" -> "Email confirmation has been sent")
+              Ok(Json.obj("message" -> "Email confirmation has been sent"))
             }
         }
       }

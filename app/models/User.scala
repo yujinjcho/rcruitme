@@ -7,7 +7,7 @@ case class User(
   firstName: String,
   googleKey: Option[String] = None,
   lastName: String,
-  userType: String,
+  userType: UserType.Type,
   email: String
 ) extends Identity {
   def loginInfo: LoginInfo = {
@@ -16,4 +16,12 @@ case class User(
       case None => LoginInfo("credentials", email)
     }
   }
+}
+
+object UserType extends Enumeration {
+  type Type = Value;
+
+  val None = Value("none");
+  val Candidate = Value("candidate");
+  val Recruiter = Value("recruiter");
 }

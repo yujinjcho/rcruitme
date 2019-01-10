@@ -1,16 +1,14 @@
 package controllers
 
-import javax.inject.Inject
-
-import com.mohiva.play.silhouette.api._
-import play.api.i18n.I18nSupport
-import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
-import utils.auth.DefaultEnv
-
 import scala.concurrent.{ ExecutionContext, Future }
 
+import com.mohiva.play.silhouette.api._
+import javax.inject.Inject
+import play.api.i18n.I18nSupport
+import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
+
 import models.services.UserService
-import utils.auth.JWTUtil
+import utils.auth.{DefaultEnv,JWTUtil}
 
 class ActivateAccountController @Inject() (
   cc: ControllerComponents,
@@ -19,7 +17,6 @@ class ActivateAccountController @Inject() (
   jwtUtil: JWTUtil
   )(implicit ex: ExecutionContext
 ) extends AbstractController(cc) with I18nSupport {
-
 
   def activate(token: String) = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     jwtUtil.unserialize(token) match {

@@ -36,7 +36,7 @@ class SignUpController @Inject() (
           case Some(user) if user.googleKey.isDefined =>
             val authInfo = passwordHasherRegistry.current.hash(data.password)
             for {
-              authInfo <- authInfoRepository.add(loginInfo, authInfo)
+              _ <- authInfoRepository.add(loginInfo, authInfo)
             } yield {
               Ok(Json.obj("message" -> "Synced to existing account"))
             }
@@ -53,7 +53,7 @@ class SignUpController @Inject() (
             )
             for {
               user <- userService.save(user)
-              authInfo <- authInfoRepository.add(loginInfo, authInfo)
+              _ <- authInfoRepository.add(loginInfo, authInfo)
               authenticator <- silhouette.env.authenticatorService.create(loginInfo)
               token <- silhouette.env.authenticatorService.init(authenticator)
             } yield {

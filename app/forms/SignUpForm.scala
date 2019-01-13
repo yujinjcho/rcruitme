@@ -7,6 +7,7 @@ object SignUpForm {
 
   val form = Form(
     mapping(
+      "userType" -> nonEmptyText,
       "email" -> email,
       "firstName" -> nonEmptyText,
       "lastName" -> nonEmptyText,
@@ -15,6 +16,7 @@ object SignUpForm {
   )
 
   case class Data(
+    userType: String,
     email: String,
     firstName: String,
     lastName: String,

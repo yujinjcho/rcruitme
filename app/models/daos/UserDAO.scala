@@ -4,16 +4,25 @@ import scala.concurrent.Future
 
 import anorm._
 import anorm.SqlParser.get
+import anorm.ToStatement
 import com.mohiva.play.silhouette.api.LoginInfo
 import javax.inject.{Inject, Singleton}
+import java.sql.PreparedStatement
 import play.api.db.DBApi
 
 import models.{ DatabaseExecutionContext, User }
+import models.UserType
 import models.daos.UserDAO._
 
 @Singleton
 class UserDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
+
+  implicit private def userTypeToStatement(implicit c: ToStatement[String]) =
+    new ToStatement[UserType.Type] {
+      def set(c: PreparedStatement, i: Int, v: UserType.Type) =
+        c.setString(i, v.toString)
+    }
 
   implicit private val parameters = Macro.toParameters[User]
 
@@ -106,7 +115,7 @@ object UserDAO {
     get[String]("userType") ~
     get[Boolean]("activated") map {
       case id~first~last~email~googleKey~userType~activated =>
-        User(id, first, googleKey, last, userType, email, activated)
+        User(id, first, googleKey, last, UserType.withName(userType), email, activated)
       // case _ => should throw some exception here?
     }
   }

@@ -14,7 +14,7 @@ import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Requ
 
 import forms.SignUpForm
 import models.services.UserService
-import models.{ DatabaseExecutionContext, User}
+import models.{ DatabaseExecutionContext, User, UserType }
 import utils.auth.DefaultEnv
 
 class SignUpController @Inject() (
@@ -48,7 +48,7 @@ class SignUpController @Inject() (
               userID = 0,
               firstName = data.firstName,
               lastName = data.lastName,
-              userType = "user_type_placeholder",
+              userType = UserType.withName(data.userType),
               email = data.email
             )
             for {

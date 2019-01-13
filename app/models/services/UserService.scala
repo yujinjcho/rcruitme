@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import com.mohiva.play.silhouette.api.services.IdentityService
 import javax.inject.Inject
 
-import models.User
+import models.{ User, UserType }
 import models.daos.UserDAO
 
 class UserService @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext) extends IdentityService[User]  {
@@ -30,7 +30,7 @@ class UserService @Inject() (userDAO: UserDAO)(implicit ex: ExecutionContext) ex
             googleKey = Some(loginInfo.providerKey),
             firstName = first,
             lastName = last,
-            userType = "user_type",
+            userType = UserType.withName("none"),
             email = email
           ))
       }

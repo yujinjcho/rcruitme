@@ -27,9 +27,10 @@ class SocialAuthController @Inject() (
   extends AbstractController(cc) with I18nSupport with Logger {
 
   def authenticate(provider: String, redirect: Option[String]) = Action.async { implicit request: Request[AnyContent] =>
+    val redirectURL = redirect.getOrElse("")
     (socialProviderRegistry.get[SocialStateProvider](provider) match {
       case Some(p: SocialStateProvider with CommonSocialProfileBuilder) =>
-        p.authenticate(UserStateItem(Map("redirect" -> redirect.getOrElse("")))).flatMap {
+        p.authenticate(UserStateItem(Map("redirect" -> redirectURL))).flatMap {
           case Left(result) => Future.successful(result)
           case Right(StatefulAuthInfo(authInfo, userState)) => for {
             profile <- p.retrieveProfile(authInfo)
@@ -40,7 +41,7 @@ class SocialAuthController @Inject() (
             result <- silhouette.env.authenticatorService.embed(token, Redirect(userState.state("redirect")))
           } yield {
 
-            val url = routes.ActivateAccountController.activate(token, redirect.getOrElse("")).absoluteURL()
+            val url = routes.ActivateAccountController.activate(token, redirectURL).absoluteURL()
             if (!user.activated) {
               mailerClient.send(Email(
                 subject = Messages("email.sign.up.subject"),

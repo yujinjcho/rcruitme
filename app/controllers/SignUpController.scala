@@ -27,7 +27,7 @@ class SignUpController @Inject() (
   )(implicit ex: DatabaseExecutionContext)
   extends AbstractController(cc) with I18nSupport {
 
-  def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def submit(redirect: String) = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignUpForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(form.errorsAsJson)),
       data => {
@@ -58,7 +58,7 @@ class SignUpController @Inject() (
               token <- silhouette.env.authenticatorService.init(authenticator)
             } yield {
 
-              val url = routes.ActivateAccountController.activate(token).absoluteURL()
+              val url = routes.ActivateAccountController.activate(token, redirect).absoluteURL()
               mailerClient.send(
                 Email(
                   subject = Messages("email.sign.up.subject"),

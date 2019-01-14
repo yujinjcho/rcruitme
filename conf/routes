@@ -11,6 +11,6 @@ POST    /submit-job                         controllers.SubmitJobController.subm
 GET     /sign-in                            controllers.SignInController.view
 POST    /sign-in                            controllers.SignInController.submit
 
-POST    /sign-up                            controllers.SignUpController.submit
+POST    /sign-up                            controllers.SignUpController.submit(redirect)
 
-GET     /activate/:token                    controllers.ActivateAccountController.activate(token)
+GET     /activate/:token                    controllers.ActivateAccountController.activate(token, redirect)

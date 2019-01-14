@@ -40,7 +40,7 @@ class SocialAuthController @Inject() (
             result <- silhouette.env.authenticatorService.embed(token, Redirect(userState.state("redirect")))
           } yield {
 
-            val url = routes.ActivateAccountController.activate(token).absoluteURL()
+            val url = routes.ActivateAccountController.activate(token, userState.state("redirect")).absoluteURL()
             if (!user.activated) {
               mailerClient.send(Email(
                 subject = Messages("email.sign.up.subject"),

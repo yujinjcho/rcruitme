@@ -37,7 +37,7 @@ class SocialAuthController @Inject() (
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
             token <- silhouette.env.authenticatorService.init(authenticator)
-            result <- silhouette.env.authenticatorService.embed(token, Redirect(s"${userState.state("redirect")}?token=$token"))
+            result <- Future.successful(Redirect(s"${userState.state("redirect")}?token=$token"))
           } yield {
 
             val url = routes.ActivateAccountController.activate(token, userState.state("redirect")).absoluteURL()

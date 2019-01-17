@@ -1,6 +1,7 @@
 package models
 
 import com.mohiva.play.silhouette.api.{ Identity, LoginInfo }
+import play.api.libs.json._
 
 case class User(
   userID: Int,
@@ -16,6 +17,19 @@ case class User(
       case Some(key) => LoginInfo("google", key)
       case None => LoginInfo("credentials", email)
     }
+  }
+}
+
+object User {
+  implicit val writes = new Writes[User] {
+    def writes(user: User) = Json.obj(
+      "id" -> user.userID,
+      "firstName" -> user.firstName,
+      "lastName" -> user.lastName,
+      "email" -> user.email,
+      "type" -> user.userType.toString,
+      "activated" -> user.activated
+    )
   }
 }
 

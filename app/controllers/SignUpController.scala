@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import javax.inject.Inject
-import play.api.i18n.{ I18nSupport, Messages }
+import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
@@ -61,8 +61,8 @@ class SignUpController @Inject() (
               val url = routes.ActivateAccountController.activate(token, redirect).absoluteURL()
               mailerClient.send(
                 Email(
-                  subject = Messages("email.sign.up.subject"),
-                  from = Messages("email.from"),
+                  subject = "Welcome",
+                  from = "Rcruitme",
                   to = Seq(data.email),
                   bodyText = Some(views.txt.emails.signUp(user, url).body),
                   bodyHtml = Some(views.html.emails.signUp(user, url).body)

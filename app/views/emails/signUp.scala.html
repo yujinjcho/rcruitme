@@ -1,11 +1,8 @@
-@import play.api.i18n.Messages
-@import play.twirl.api.Html
-
-@(user: models.User, url: String)(implicit messages: Messages)
+@(user: models.User, url: String)
 
 <html>
 <body>
-<p>@messages("email.sign.up.hello", user.firstName)</p>
-<p>@Html(messages("email.sign.up.html.text", url))</p>
+<p>Hello @user.firstName,</p>
+<p>Please follow <a href="@url">this link</a> to confirm and activate your new account.</p>
 </body>
 </html>

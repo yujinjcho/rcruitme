@@ -13,7 +13,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import javax.inject.Inject
 import net.ceedubs.ficus.Ficus._
 import play.api.Configuration
-import play.api.i18n.{ I18nSupport, Messages }
+import play.api.i18n.I18nSupport
 import play.api.libs.json._
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 
@@ -80,7 +80,7 @@ class SignInController @Inject() (
           case _: ProviderException =>
             BadRequest(Json.obj(
               "providers" -> Json.toJson(socialProviderRegistry.providers),
-              "errors" -> Messages("invalid.credentials")
+              "errors" -> "Invalid credentials!"
             ))
         }
       }

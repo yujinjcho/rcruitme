@@ -8,7 +8,6 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.providers.state.UserStateItem
 import javax.inject.Inject
-import play.api.i18n.{ I18nSupport, Messages }
 import play.api.libs.json._
 import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
@@ -24,7 +23,7 @@ class SocialAuthController @Inject() (
     socialProviderRegistry: SocialProviderRegistry,
     mailerClient: MailerClient,
   )(implicit ex: ExecutionContext)
-  extends AbstractController(cc) with I18nSupport with Logger {
+  extends AbstractController(cc) with Logger {
 
   def authenticate(provider: String, redirect: Option[String]) = Action.async { implicit request: Request[AnyContent] =>
     (socialProviderRegistry.get[SocialStateProvider](provider) match {
@@ -43,8 +42,8 @@ class SocialAuthController @Inject() (
             val url = routes.ActivateAccountController.activate(token, userState.state("redirect")).absoluteURL()
             if (!user.activated) {
               mailerClient.send(Email(
-                subject = Messages("email.sign.up.subject"),
-                from = Messages("email.from"),
+                subject = "Welcome",
+                from = "Rcruitme",
                 to = Seq(user.email),
                 bodyText = Some(views.txt.emails.signUp(user, url).body),
                 bodyHtml = Some(views.html.emails.signUp(user, url).body)
@@ -58,7 +57,7 @@ class SocialAuthController @Inject() (
     }).recover {
       case e: ProviderException =>
         logger.error("Unexpected provider error", e)
-        BadRequest(Json.obj("errors" -> Messages("invalid.credentials")))
+        BadRequest(Json.obj("errors" -> "Invalid credentials!"))
     }
   }
 

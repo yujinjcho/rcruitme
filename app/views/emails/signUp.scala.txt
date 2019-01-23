@@ -1,6 +1,5 @@
-@import play.api.i18n.Messages
+@(user: models.User, url: String)
 
-@(user: models.User, url: String)(implicit messages: Messages)
-@messages("email.sign.up.hello", user.firstName)
+Hello @user.firstName,
 
-@messages("email.sign.up.txt.text", url)
+Please follow the link to confirm and activate your new account: @url

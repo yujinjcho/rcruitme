@@ -2,14 +2,14 @@ GET     /                                   controllers.HomeController.index
 
 GET     /hello                              controllers.HomeController.hello(name:String)
 GET     /google                             controllers.HomeController.google
-GET     /authenticate/:provider             controllers.SocialAuthController.authenticate(provider, redirect:Option[String])
+GET     /authenticate/:provider             controllers.SocialAuthController.authenticate(provider, redirect:Option[String], postAuthRedirect: Option[String])
 
 GET     /sign-out                           controllers.HomeController.signOut
 
 POST    /submit-job                         controllers.SubmitJobController.submit
 
 GET     /sign-in                            controllers.SignInController.view
-POST    /sign-in                            controllers.SignInController.submit
+POST    /sign-in                            controllers.SignInController.submit(redirect: Option[String])
 
 POST    /sign-up                            controllers.SignUpController.submit(redirect)
 

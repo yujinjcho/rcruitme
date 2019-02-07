@@ -44,7 +44,7 @@ class SignInController @Inject() (
     )))
   }
 
-  def submit() = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
+  def submit(redirect: Option[String]) = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignInForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(Json.obj(
         "providers" -> Json.toJson(socialProviderRegistry.providers),
@@ -70,7 +70,8 @@ class SignInController @Inject() (
                   silhouette.env.eventBus.publish(LoginEvent(user, request))
                   silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
                     silhouette.env.authenticatorService.embed(v, Ok(Json.obj(
-                      "result" -> "success"
+                      "result" -> "success",
+                      "redirect" -> JsString(redirect.getOrElse(""))
                     )))
                   }
               }

@@ -26,10 +26,10 @@ class SocialAuthController @Inject() (
   )(implicit ex: ExecutionContext)
   extends AbstractController(cc) with I18nSupport with Logger {
 
-  def authenticate(provider: String, redirect: Option[String]) = Action.async { implicit request: Request[AnyContent] =>
+  def authenticate(provider: String, redirect: Option[String], postAuthRedirect: Option[String]) = Action.async { implicit request: Request[AnyContent] =>
     (socialProviderRegistry.get[SocialStateProvider](provider) match {
       case Some(p: SocialStateProvider with CommonSocialProfileBuilder) =>
-        p.authenticate(UserStateItem(Map("redirect" -> redirect.getOrElse("")))).flatMap {
+        p.authenticate(UserStateItem(Map("redirect" -> redirect.getOrElse(""), "postAuthRedirect" -> postAuthRedirect.getOrElse("")))).flatMap {
           case Left(result) => Future.successful(result)
           case Right(StatefulAuthInfo(authInfo, userState)) => for {
             profile <- p.retrieveProfile(authInfo)
@@ -37,7 +37,9 @@ class SocialAuthController @Inject() (
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
             token <- silhouette.env.authenticatorService.init(authenticator)
-            result <- Future.successful(Redirect(s"${userState.state("redirect")}?token=$token"))
+            result <- Future.successful(
+              Redirect(s"${userState.state("redirect")}?token=$token&redirect=${userState.state("postAuthRedirect")}")
+            )
           } yield {
 
             val url = routes.ActivateAccountController.activate(token, userState.state("redirect")).absoluteURL()

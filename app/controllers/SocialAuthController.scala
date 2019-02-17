@@ -29,31 +29,33 @@ class SocialAuthController @Inject() (
     (socialProviderRegistry.get[SocialStateProvider](provider) match {
       case Some(p: SocialStateProvider with CommonSocialProfileBuilder) =>
         p.authenticate(UserStateItem(Map("redirect" -> redirect.getOrElse(""), "postAuthRedirect" -> postAuthRedirect.getOrElse("")))).flatMap {
-          case Left(result) => Future.successful(result)
-          case Right(StatefulAuthInfo(authInfo, userState)) => for {
-            profile <- p.retrieveProfile(authInfo)
-            user <- userService.save(profile)
-            _ <- authInfoRepository.save(profile.loginInfo, authInfo)
-            authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
-            token <- silhouette.env.authenticatorService.init(authenticator)
-            result <- Future.successful(
-              Redirect(s"${userState.state("redirect")}?token=$token&redirect=${userState.state("postAuthRedirect")}")
-            )
-          } yield {
-
-            val url = routes.ActivateAccountController.activate(token, userState.state("redirect")).absoluteURL()
-            if (!user.activated) {
-              mailerClient.send(Email(
-                subject = "Welcome",
-                from = "Rcruitme",
-                to = Seq(user.email),
-                bodyText = Some(views.txt.emails.signUp(user, url).body),
-                bodyHtml = Some(views.html.emails.signUp(user, url).body)
+          case Left(result) =>
+            Future.successful(result)
+          case Right(StatefulAuthInfo(authInfo, userState)) =>
+            for {
+              profile <- p.retrieveProfile(authInfo)
+              user <- userService.save(profile)
+              _ <- authInfoRepository.save(profile.loginInfo, authInfo)
+              authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
+              token <- silhouette.env.authenticatorService.init(authenticator)
+              result <- Future.successful(Redirect(
+                s"${userState.state("redirect")}?token=$token" + (if (user.activated) s"&redirect=${userState.state("postAuthRedirect")}" else "")
               ))
+            } yield {
+              val newUrl: String = userState.state("redirect") + s"?redirect=${userState.state("postAuthRedirect")}"
+              val url = routes.ActivateAccountController.activate(token, newUrl).absoluteURL()
+              if (!user.activated) {
+                mailerClient.send(Email(
+                  subject = "Welcome",
+                  from = "Rcruitme",
+                  to = Seq(user.email),
+                  bodyText = Some(views.txt.emails.signUp(user, url).body),
+                  bodyHtml = Some(views.html.emails.signUp(user, url).body)
+                ))
+              }
+              silhouette.env.eventBus.publish(LoginEvent(user, request))
+              result
             }
-            silhouette.env.eventBus.publish(LoginEvent(user, request))
-            result
-          }
         }
       case _ => Future.failed(new ProviderException(s"Cannot authenticate with unexpected social provider $provider"))
     }).recover {

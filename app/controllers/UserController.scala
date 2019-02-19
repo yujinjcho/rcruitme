@@ -36,7 +36,7 @@ class UserController @Inject() (
         userService.update(user.copy(
           firstName = data.firstName.getOrElse(user.firstName),
           lastName = data.lastName.getOrElse(user.lastName),
-          userType = UserType.withName(data.userType.get),
+          userType = UserType.withName(data.userType.getOrElse(user.userType.toString)),
           email = data.email.getOrElse(user.email)
         )).map { updatedUser =>
           Ok(Json.toJson(user))

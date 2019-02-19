@@ -18,10 +18,7 @@ class UserController @Inject() (
   cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   userService: UserService
-)(
-  implicit
-  ex: ExecutionContext
-) extends AbstractController(cc) with I18nSupport {
+)(implicit ex: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
   def get = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
     val user: User = request.identity

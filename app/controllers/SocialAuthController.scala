@@ -36,6 +36,7 @@ class SocialAuthController @Inject() (
               profile <- p.retrieveProfile(authInfo)
               user <- userService.save(profile)
               _ <- authInfoRepository.save(profile.loginInfo, authInfo)
+              a = {println(authInfo); "a"}
               authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
               token <- silhouette.env.authenticatorService.init(authenticator)
               result <- Future.successful(Redirect(

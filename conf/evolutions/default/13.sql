@@ -1,4 +1,4 @@
-# add user type
+# add user password
 
 # --- !Ups
 

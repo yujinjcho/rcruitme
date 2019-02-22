@@ -29,7 +29,7 @@ import net.ceedubs.ficus.readers.ValueReader
 import net.codingwell.scalaguice.ScalaModule
 
 import models.services.UserService
-import models.daos.PasswordAuthInfoDAO
+import models.daos.{PasswordAuthInfoDAO,SocialAuthInfoDAO}
 import utils.auth.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -59,7 +59,7 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
 
     // Replace this with the bindings to your concrete DAOs
     bind[DelegableAuthInfoDAO[PasswordInfo]].to[PasswordAuthInfoDAO]
-    bind[DelegableAuthInfoDAO[OAuth2Info]].toInstance(new InMemoryAuthInfoDAO[OAuth2Info])
+    bind[DelegableAuthInfoDAO[OAuth2Info]].to[SocialAuthInfoDAO]
   }
 
   @Provides

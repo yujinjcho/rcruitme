@@ -2,6 +2,9 @@ package controllers
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+
+import java.net.URI
+
 import com.mohiva.play.silhouette.api._
 import javax.inject.Inject
 import com.mohiva.play.silhouette.api.crypto.CrypterAuthenticatorEncoder
@@ -31,7 +34,7 @@ class ActivateAccountController @Inject() (
             createConnectionIfSharedLink(redirect, user)
 
             userService.update(user.copy(activated = true)).map { _ =>
-              Redirect(redirect)
+              Redirect(addTokenToRedirect(redirect, token))
             }
           case None =>
             Future.successful(Ok("user not found"))
@@ -56,5 +59,10 @@ class ActivateAccountController @Inject() (
       case Array("submit-job", candidateId)  => Some(candidateId.toInt)
       case _ => None
     }
+  }
+
+  private def addTokenToRedirect(redirect: String, token: String): String = {
+    val separator = if (new URI(redirect).getQuery() == null) "?" else "&"
+    redirect + separator + s"token=$token"
   }
 }

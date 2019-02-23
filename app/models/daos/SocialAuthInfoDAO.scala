@@ -21,8 +21,8 @@ class SocialAuthInfoDAO @Inject()(
 
   def find(loginInfo: LoginInfo): Future[Option[OAuth2Info]] = {
     val password: Option[(String,Int)] = db.withConnection { implicit c =>
-      SQL("SELECT google_token, token_expiry FROM users WHERE email = {email}")
-        .on("email" -> loginInfo.providerKey)
+      SQL("SELECT google_token, token_expiry FROM users WHERE google_key = {googleKey}")
+        .on("googleKey" -> loginInfo.providerKey)
         .as(str("google_token") ~ int("token_expiry") map (SqlParser.flatten) singleOpt)
     }
     Future.successful(
@@ -54,12 +54,7 @@ class SocialAuthInfoDAO @Inject()(
     Future.successful(authInfo)
   }
 
-  def save(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] = {
-    find(loginInfo).flatMap {
-      case Some(_) => update(loginInfo, authInfo)
-      case None    => add(loginInfo, authInfo)
-    }
-  }
+  def save(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] = update(loginInfo, authInfo)
 
   def remove(loginInfo: LoginInfo): Future[Unit] = {
      val rowsUpdated : Int = db.withConnection { implicit conn =>

@@ -45,12 +45,7 @@ class PasswordAuthInfoDAO @Inject()(
     Future.successful(authInfo)
   }
 
-  def save(loginInfo: LoginInfo, authInfo: PasswordInfo): Future[PasswordInfo] = {
-    find(loginInfo).flatMap {
-      case Some(_) => update(loginInfo, authInfo)
-      case None    => add(loginInfo, authInfo)
-    }
-  }
+  def save(loginInfo: LoginInfo, authInfo: PasswordInfo): Future[PasswordInfo] = update(loginInfo, authInfo)
 
   def remove(loginInfo: LoginInfo): Future[Unit] = {
      val rowsUpdated : Int = db.withConnection { implicit conn =>

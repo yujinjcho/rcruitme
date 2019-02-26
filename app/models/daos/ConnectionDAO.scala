@@ -12,6 +12,22 @@ class ConnectionDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContex
 
   private val db = dbapi.database("default")
 
+  def exists(candidateId: Int, recruiterId: Int): Future[Boolean] = Future {
+    db.withConnection { implicit conn =>
+      SQL(
+        """
+        SELECT EXISTS(
+          SELECT 1
+          FROM connections
+          WHERE candidate_id = {candidate_id}
+            AND recruiter_id = {recruiter_id}
+        );
+      """)
+        .on("candidate_id" -> candidateId, "recruiter_id" -> recruiterId)
+        .as(SqlParser.bool("exists").single)
+    }
+  }
+
   def create(candidateId: Int, recruiterId: Int): Future[Option[Long]] = Future {
     db.withConnection { implicit conn =>
       SQL("""

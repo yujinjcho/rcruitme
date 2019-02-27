@@ -34,7 +34,9 @@ class SubmitJobController @Inject()(
                 salary = data.salary,
                 compensation = data.compensation,
                 description = data.description,
-                benefits = data.benefits
+                benefits = data.benefits,
+                candidateId = candidateId.toInt,
+                recruiterId = request.identity.userID
               )
               jobDAO.create(job).map { job => Created(Json.toJson(job)) }
             case false =>

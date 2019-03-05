@@ -11,6 +11,8 @@ case class Job(
   compensation: Option[String],
   description: String,
   benefits: Option[String],
+  candidateId: Int,
+  recruiterId: Int,
   viewed: Boolean = false,
   submittedAt: DateTime = DateTime.now
 )

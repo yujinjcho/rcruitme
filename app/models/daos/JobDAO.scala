@@ -29,7 +29,9 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
             description,
             benefits,
             viewed,
-            submitted_at
+            submitted_at,
+            candidate_id,
+            recruiter_id
           )
         VALUES
           (
@@ -41,7 +43,9 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
             {description},
             {benefits},
             {viewed},
-            {submittedAt}
+            {submittedAt},
+            {candidateId},
+            {recruiterId}
           )
       """).bind(job).executeInsert()
     }

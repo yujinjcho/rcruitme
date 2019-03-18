@@ -20,6 +20,7 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
+  "com.typesafe.play" %% "play-json-joda" % "2.7.2",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
   "net.codingwell" %% "scala-guice" % "4.1.0",

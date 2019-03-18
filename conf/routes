@@ -6,7 +6,8 @@ GET     /authenticate/:provider             controllers.SocialAuthController.aut
 
 GET     /sign-out                           controllers.HomeController.signOut
 
-POST    /submit-job/:candidateId            controllers.SubmitJobController.submit(candidateId: String)
+GET     /job/:id                            controllers.JobController.get(id: Int)
+POST    /submit-job/:candidateId            controllers.JobController.submit(candidateId: String)
 
 GET     /sign-in                            controllers.SignInController.view
 POST    /sign-in                            controllers.SignInController.submit(redirect: Option[String])

@@ -13,12 +13,26 @@ import models.Job
 import models.daos.{ConnectionDAO,JobDAO}
 import utils.auth.DefaultEnv
 
-class SubmitJobController @Inject()(
+class JobController @Inject()(
   cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   jobDAO: JobDAO,
   connectionDAO: ConnectionDAO
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with I18nSupport {
+
+  def get(id: Int) = silhouette.SecuredAction.async { implicit request =>
+    val userId = request.identity.userID
+
+    jobDAO.find(id).map {
+      case Some(job) =>
+        if (job.candidateId != userId && job.recruiterId != userId)
+          BadRequest(Json.obj("errors" -> "job does not belong to user"))
+        else
+          Ok(Json.toJson(job))
+      case None =>
+        NotFound(Json.obj("errors" -> "job does not exist"))
+    }
+  }
 
   def submit(candidateId: String) = silhouette.SecuredAction.async { implicit request =>
     JobForm.form.bindFromRequest.fold(

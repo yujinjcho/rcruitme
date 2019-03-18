@@ -13,7 +13,7 @@ import models.Job
 import models.daos.{ConnectionDAO,JobDAO}
 import utils.auth.DefaultEnv
 
-class SubmitJobController @Inject()(
+class JobController @Inject()(
   cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   jobDAO: JobDAO,

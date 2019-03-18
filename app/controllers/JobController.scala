@@ -23,11 +23,14 @@ class JobController @Inject()(
   def get(id: Int) = silhouette.SecuredAction.async { implicit request =>
     val userId = request.identity.userID
 
-    jobDAO.find(id).map { job =>
-      if (job.candidateId != userId && job.recruiterId != userId)
-        BadRequest(Json.obj("errors" -> "job does not belong to user"))
-      else
-        Ok(Json.toJson(job))
+    jobDAO.find(id).map {
+      case Some(job) =>
+        if (job.candidateId != userId && job.recruiterId != userId)
+          BadRequest(Json.obj("errors" -> "job does not belong to user"))
+        else
+          Ok(Json.toJson(job))
+      case None =>
+        NotFound(Json.obj("errors" -> "job does not exist"))
     }
   }
 

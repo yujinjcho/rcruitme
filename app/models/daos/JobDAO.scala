@@ -17,7 +17,7 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   implicit private val parameters = Macro.toParameters[Job]
 
-  def find(id: Int): Future[Job] = Future {
+  def find(id: Int): Future[Option[Job]] = Future {
     db.withConnection { implicit conn =>
       SQL("""
         SELECT
@@ -35,7 +35,7 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
           recruiter_id as recruiterId
         FROM jobs
         WHERE id = {id}
-      """).on("id" -> id).as(jobRowParser.single)
+      """).on("id" -> id).as(jobRowParser.singleOpt)
     }
   }
 

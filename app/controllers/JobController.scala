@@ -20,6 +20,17 @@ class JobController @Inject()(
   connectionDAO: ConnectionDAO
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
+  def get(id: Int) = silhouette.SecuredAction.async { implicit request =>
+    val userId = request.identity.userID
+
+    jobDAO.find(id).map { job =>
+      if (job.candidateId != userId && job.recruiterId != userId)
+        BadRequest(Json.obj("errors" -> "job does not belong to user"))
+      else
+        Ok(Json.toJson(job))
+    }
+  }
+
   def submit(candidateId: String) = silhouette.SecuredAction.async { implicit request =>
     JobForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(form.errorsAsJson)),

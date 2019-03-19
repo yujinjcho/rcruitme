@@ -25,19 +25,7 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
     db.withConnection { implicit conn =>
       SQL"""
-        SELECT
-          id,
-          role,
-          company,
-          location,
-          salary,
-          compensation,
-          description,
-          benefits,
-          viewed,
-          submitted_at as submittedAt,
-          candidate_id as candidateId,
-          recruiter_id as recruiterId
+        #$selectJobModelFields
         FROM jobs
         WHERE #$idName = ${user.userID}
       """.as(jobRowParser *)
@@ -46,23 +34,11 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
   def find(id: Int): Future[Option[Job]] = Future {
     db.withConnection { implicit conn =>
-      SQL("""
-        SELECT
-          id,
-          role,
-          company,
-          location,
-          salary,
-          compensation,
-          description,
-          benefits,
-          viewed,
-          submitted_at as submittedAt,
-          candidate_id as candidateId,
-          recruiter_id as recruiterId
+      SQL"""
+        #$selectJobModelFields
         FROM jobs
-        WHERE id = {id}
-      """).on("id" -> id).as(jobRowParser.singleOpt)
+        WHERE id = $id
+      """.as(jobRowParser.singleOpt)
     }
   }
 
@@ -104,4 +80,20 @@ class JobDAO @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext) {
 
 object JobDAO {
   val jobRowParser: RowParser[Job] = Macro.namedParser[Job]
+
+  val selectJobModelFields = """
+    SELECT
+      id,
+      role,
+      company,
+      location,
+      salary,
+      compensation,
+      description,
+      benefits,
+      viewed,
+      submitted_at as submittedAt,
+      candidate_id as candidateId,
+      recruiter_id as recruiterId
+  """
 }

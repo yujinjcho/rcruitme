@@ -21,7 +21,7 @@ class JobController @Inject()(
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
   def list = silhouette.SecuredAction.async { implicit request =>
-    jobDAO.findAll(request.identity).map(jobs => Ok(Json.toJson(jobs)))
+    jobDAO.findAll(request.identity).map { jobs => Ok(Json.toJson(jobs)) }
   }
 
   def get(id: Int) = silhouette.SecuredAction.async { implicit request =>

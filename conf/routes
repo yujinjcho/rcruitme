@@ -6,6 +6,7 @@ GET     /authenticate/:provider             controllers.SocialAuthController.aut
 
 GET     /sign-out                           controllers.HomeController.signOut
 
+GET     /jobs                               controllers.JobController.list
 GET     /job/:id                            controllers.JobController.get(id: Int)
 POST    /submit-job/:candidateId            controllers.JobController.submit(candidateId: String)
 

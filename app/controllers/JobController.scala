@@ -20,6 +20,10 @@ class JobController @Inject()(
   connectionDAO: ConnectionDAO
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with I18nSupport {
 
+  def list = silhouette.SecuredAction.async { implicit request =>
+    jobDAO.findAll(request.identity).map(jobs => Ok(Json.toJson(jobs)))
+  }
+
   def get(id: Int) = silhouette.SecuredAction.async { implicit request =>
     val userId = request.identity.userID
 
@@ -52,7 +56,7 @@ class JobController @Inject()(
                 candidateId = candidateId.toInt,
                 recruiterId = request.identity.userID
               )
-              jobDAO.create(job).map { job => Created(Json.toJson(job)) }
+              jobDAO.create(job).map(job => Created(Json.toJson(job)))
             case false =>
               Future.successful(BadRequest(Json.obj("errors" -> "recruiter is not connected to candidate")))
           }

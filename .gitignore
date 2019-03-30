@@ -4,3 +4,4 @@ logs/
 *.swp
 *.iml
 .env
+svc/

@@ -19,6 +19,10 @@ class HomeController @Inject()(
     Future.successful(Ok(views.html.index()))
   }
 
+  def healthCheck = Action { implicit request: Request[AnyContent] =>
+    Ok("Ok")
+  }
+
   def hello(name: String) = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.hello(name))
   }

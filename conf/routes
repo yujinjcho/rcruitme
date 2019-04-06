@@ -3,20 +3,20 @@ GET     /health                             controllers.HomeController.healthChe
 
 GET     /hello                              controllers.HomeController.hello(name:String)
 GET     /google                             controllers.HomeController.google
-GET     /authenticate/:provider             controllers.SocialAuthController.authenticate(provider, redirect:Option[String], postAuthRedirect: Option[String])
 
-GET     /sign-out                           controllers.HomeController.signOut
+GET     /api/authenticate/:provider         controllers.SocialAuthController.authenticate(provider, redirect:Option[String], postAuthRedirect: Option[String])
+GET     /api/sign-out                       controllers.HomeController.signOut
 
-GET     /jobs                               controllers.JobController.list
-GET     /job/:id                            controllers.JobController.get(id: Int)
-POST    /submit-job/:candidateId            controllers.JobController.submit(candidateId: String)
+GET     /api/jobs                           controllers.JobController.list
+GET     /api/job/:id                        controllers.JobController.get(id: Int)
+POST    /api/submit-job/:candidateId        controllers.JobController.submit(candidateId: String)
 
-GET     /sign-in                            controllers.SignInController.view
-POST    /sign-in                            controllers.SignInController.submit(redirect: Option[String])
+GET     /api/sign-in                        controllers.SignInController.view
+POST    /api/sign-in                        controllers.SignInController.submit(redirect: Option[String])
 
-POST    /sign-up                            controllers.SignUpController.submit(redirect)
+POST    /api/sign-up                        controllers.SignUpController.submit(redirect)
 
-GET     /activate/:token                    controllers.ActivateAccountController.activate(token, redirect)
+GET     /api/activate/:token                controllers.ActivateAccountController.activate(token, redirect)
 
-GET     /user                               controllers.UserController.get
-PUT     /user                               controllers.UserController.update
+GET     /api/user                           controllers.UserController.get
+PUT     /api/user                           controllers.UserController.update

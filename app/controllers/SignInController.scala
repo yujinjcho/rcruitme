@@ -4,6 +4,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 import com.mohiva.play.silhouette.api._
+import com.mohiva.play.silhouette.api.actions.SecuredRequest
 import com.mohiva.play.silhouette.api.Authenticator.Implicits._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.util.{ Clock, Credentials }
@@ -54,7 +55,6 @@ class SignInController @Inject() (
         val credentials = Credentials(data.email, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
           userService.retrieve(loginInfo).flatMap {
-            // TODO: handle non-activated users
             case Some(user) =>
               val c = configuration.underlying
               silhouette.env.authenticatorService.create(loginInfo)
@@ -88,4 +88,9 @@ class SignInController @Inject() (
     )
   }
 
+  def signOut = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
+    val result = Redirect(routes.SignInController.view())
+    silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
+    silhouette.env.authenticatorService.discard(request.authenticator, result)
+  }
 }

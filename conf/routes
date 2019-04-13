@@ -1,21 +1,16 @@
 GET     /                                   controllers.HomeController.index
 GET     /health                             controllers.HomeController.healthCheck
 
-GET     /hello                              controllers.HomeController.hello(name:String)
-GET     /google                             controllers.HomeController.google
-
-GET     /api/authenticate/:provider         controllers.SocialAuthController.authenticate(provider, redirect:Option[String], postAuthRedirect: Option[String])
-GET     /api/sign-out                       controllers.HomeController.signOut
-
 GET     /api/jobs                           controllers.JobController.list
 GET     /api/job/:id                        controllers.JobController.get(id: Int)
 POST    /api/submit-job/:candidateId        controllers.JobController.submit(candidateId: String)
 
 GET     /api/sign-in                        controllers.SignInController.view
 POST    /api/sign-in                        controllers.SignInController.submit(redirect: Option[String])
+GET     /api/sign-out                       controllers.SignInController.signOut
 
 POST    /api/sign-up                        controllers.SignUpController.submit(redirect)
-
+GET     /api/authenticate/:provider         controllers.SocialAuthController.authenticate(provider, redirect:Option[String], postAuthRedirect: Option[String])
 GET     /api/activate/:token                controllers.ActivateAccountController.activate(token, redirect)
 
 GET     /api/user                           controllers.UserController.get

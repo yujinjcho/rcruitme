@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=v3
+VERSION=$(cat ./VERSION)
 DOCKER_IMAGE=rcruitme
 ECR_REPO=692977587379.dkr.ecr.us-east-1.amazonaws.com
 ECS_CLUSTER=Nodejs-Monolith-ECSCluster-14Q5JZDDGF5JE

@@ -3,7 +3,7 @@ services:
   - docker
 
 script:
-  - docker_build.sh
+  - bash docker_build.sh
 
 after_script:
   - docker images
@@ -16,6 +16,6 @@ before_deploy:
 
 deploy:
   provider: script
-  script: deploy.sh
+  script: bash deploy.sh
   on:
     branch: master

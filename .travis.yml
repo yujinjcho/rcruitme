@@ -29,8 +29,7 @@ before_deploy:
   - eval $(aws ecr get-login --no-include-email --region us-east-1)
 
 deploy:
-  provider: script
-  script: bash deploy.sh
-  on:
-    all_branches: true
-    condition: $TRAVIS_BRANCH =~ ^develop|master$
+  - provider: script
+    script: bash deploy.sh
+    on:
+      branch: develop

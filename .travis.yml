@@ -29,9 +29,11 @@ before_deploy:
   - eval $(aws ecr get-login --no-include-email --region us-east-1)
 
 deploy:
-  provider: script
-  script: bash deploy.sh
-  on:
-    branch:
-    - master
-    - develop
+  - provider: script
+    script: bash deploy.sh
+    on:
+      branch: master
+  - provider: script
+    script: bash deploy.sh
+    on:
+      branch: develop

@@ -11,4 +11,4 @@ DEPLOY_TAG=$ECR_REPO/$DOCKER_IMAGE:$VERSION
 docker tag $DOCKER_IMAGE:latest $DEPLOY_TAG
 docker push $DEPLOY_TAG
 
-ecs deploy $ECS_CLUSTER $SERVICE_NAME --tag $VERSION
+ecs deploy $ECS_CLUSTER $SERVICE_NAME --tag $VERSION --timeout -1

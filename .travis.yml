@@ -25,8 +25,8 @@ after_script:
   - docker images
 
 before_deploy:
-  - pip3 install --user awscli
-  - pip3 install --user ecs-deploy
+  - python3 -m pip install --user awscli
+  - python3 -m pip install --user ecs-deploy
   - export PATH=$PATH:$HOME/.local/bin
   - eval $(aws ecr get-login --no-include-email --region us-east-1)
 

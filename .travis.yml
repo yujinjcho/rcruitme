@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+script:
+  - docker_build.sh
+
+after_script:
+  - docker images
+
+before_deploy:
+  - pip install --user awscli
+  - pip install ecs-deploy
+  - export PATH=$PATH:$HOME/.local/bin
+  - eval $(aws ecr get-login --no-include-email --region us-east-1)
+
+deploy:
+  provider: script
+  script: deploy.sh
+  on:
+    branch: master

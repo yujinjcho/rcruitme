@@ -24,7 +24,7 @@ after_script:
 
 before_deploy:
   - pip install --user awscli
-  - pip install ecs-deploy
+  - pip install --user ecs-deploy
   - export PATH=$PATH:$HOME/.local/bin
   - eval $(aws ecr get-login --no-include-email --region us-east-1)
 

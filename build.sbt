@@ -11,6 +11,8 @@ crossScalaVersions := Seq("2.12.6", "2.11.12")
 
 val silhouetteVersion = "5.0.5"
 
+resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
+
 libraryDependencies ++= Seq(
   guice,
   jdbc,

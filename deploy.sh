@@ -9,6 +9,8 @@ SERVICE_NAME=rcruitme
 DEPLOY_TAG=$ECR_REPO/$DOCKER_IMAGE:$VERSION
 
 docker tag $DOCKER_IMAGE:latest $DEPLOY_TAG
+
+$(aws ecr get-login --no-include-email --region us-east-1)
 docker push $DEPLOY_TAG
 
 ecs deploy $ECS_CLUSTER $SERVICE_NAME --tag $VERSION --timeout -1

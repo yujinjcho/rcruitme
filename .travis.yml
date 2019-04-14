@@ -4,6 +4,8 @@ scala:
 sudo: required
 services:
   - docker
+env:
+  - AWS_DEFAULT_REGION=us-east-1
 
 addons:
   apt:

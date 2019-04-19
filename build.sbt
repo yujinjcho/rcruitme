@@ -9,6 +9,8 @@ scalaVersion := "2.12.6"
 
 crossScalaVersions := Seq("2.12.6", "2.11.12")
 
+resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
+
 val silhouetteVersion = "5.0.5"
 
 libraryDependencies ++= Seq(

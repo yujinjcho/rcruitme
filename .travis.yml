@@ -1,0 +1,42 @@
+language: scala
+scala:
+  - 2.12.6
+sudo: required
+services:
+  - docker
+env:
+  - AWS_DEFAULT_REGION=us-east-1
+
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-pip"
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
+
+script:
+  - bash docker_build.sh
+
+after_script:
+  - docker images
+
+before_deploy:
+  - pip3 install --user awscli
+  - pip3 install --user ecs-deploy
+  - export PATH=$PATH:$HOME/.local/bin
+
+deploy:
+  - provider: script
+    script: bash deploy.sh
+    on:
+      branch: master
